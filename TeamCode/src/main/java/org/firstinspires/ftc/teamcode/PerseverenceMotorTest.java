@@ -22,44 +22,45 @@ public class PerseverenceMotorTest extends LinearOpMode {
     @Override
 
     public void runOpMode() {
-        robot.init(hardwareMap);
-        waitForStart();
-        telemetry.addData("Ready?", "Press A");
-        telemetry.update();
-        while (!gamepad1.a) {
-            waitMilis(50);
-        }
-        telemetry.addData("Rollers", "Press A for positive 25%");
-        telemetry.update();
-        while (!gamepad1.a) {
-            waitMilis(50);
-        }
-        robot.rollers.setPower(.25);
-        waitMilis(5000);
-        robot.rollers.setPower(0);
-        telemetry.addData("Tendrails", "Press A for positive 25%");
-        telemetry.update();
-        while (!gamepad1.a) {
-            waitMilis(50);
-        }
-        robot.tendrails.setPower(.25);
-        waitMilis(5000);
-        robot.tendrails.setPower(0);
-        telemetry.addData("LookingGlass", "Press A for positive 25%");
-        telemetry.update();
-        while (!gamepad1.a) {
-            waitMilis(50);
-        }
-        robot.lookingGlass.setPower(.25);
-        waitMilis(5000);
-        robot.lookingGlass.setPower(0);
-        telemetry.addData("Flywheel", "Press A for positive 25%");
-        telemetry.update();
-        while (!gamepad1.a) {
-            waitMilis(50);
-        }
-        robot.flyWheel.setPower(.25);
-        waitMilis(5000);
-        robot.flyWheel.setPower(0);
+//        robot.init(hardwareMap);
+//        waitForStart();
+//        telemetry.addData("Ready?", "Press A");
+//        telemetry.update();
+//        while (!gamepad1.a) {
+//            waitMilis(50);
+//        }
+//        telemetry.addData("Rollers", "Press A for positive 25%");
+//        telemetry.update();
+//        while (!gamepad1.a) {
+//            waitMilis(50);
+//        }
+//        robot.rollers.setPower(.25);
+//        waitMilis(5000);
+//        robot.rollers.setPower(0);
+//        telemetry.addData("Tendrails", "Press A for positive 25%");
+//        telemetry.update();
+//        while (!gamepad1.a) {
+//            waitMilis(50);
+//        }
+//        robot.tendrails.setPower(.25);
+//        waitMilis(5000);
+//        robot.tendrails.setPower(0);
+//        telemetry.addData("LookingGlass", "Press A for positive 25%");
+//        telemetry.update();
+//        while (!gamepad1.a) {
+//            waitMilis(50);
+//        }
+//        robot.lookingGlass.setPower(.25);
+//        waitMilis(5000);
+//        robot.lookingGlass.setPower(0);
+//        telemetry.addData("Flywheel", "Press A for positive 25%");
+//        telemetry.update();
+//        while (!gamepad1.a) {
+//            waitMilis(50);
+//        }
+//        robot.flyWheel.setPower(.25);
+//        waitMilis(5000);
+//        robot.flyWheel.setPower(0);
+//    }
     }
 }

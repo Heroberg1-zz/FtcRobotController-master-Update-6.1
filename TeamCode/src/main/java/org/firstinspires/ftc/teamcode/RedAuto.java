@@ -6,12 +6,6 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import com.arcrobotics.ftclib.geometry.Pose2d;
-import com.arcrobotics.ftclib.geometry.Rotation2d;
-import com.arcrobotics.ftclib.geometry.Transform2d;
-import com.arcrobotics.ftclib.geometry.Translation2d;
-import com.spartronics4915.lib.T265Camera;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -20,14 +14,8 @@ import org.firstinspires.ftc.teamcode.HardwarePerseverence;
 
 @Autonomous(name = "Auto", group = "Pushbot")
 public class RedAuto extends LinearOpMode {
-    Transform2d cameraToRobot = new Transform2d();
     // Increase this value to trust encoder odometry less when fusing encoder measurements with VSLAM
     double encoderMeasurementCovariance = 0.8;
-    // Set to the starting pose of the robot
-    Pose2d startingPose = new Pose2d(1, 1, new Rotation2d());
-
-    T265Camera slamra = new T265Camera(cameraToRobot, encoderMeasurementCovariance, hardwareMap.appContext);
-//slamra.setPose(startingPose); // Useful if your robot doesn't start at the field-relative origin
     HardwarePerseverence robot = new HardwarePerseverence();
     private final ElapsedTime runtime = new ElapsedTime();
     private BNO055IMU imu;
@@ -206,37 +194,37 @@ public class RedAuto extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             // go to line
-            autoPilot(1.57, 1.57, 120, .4, 10);
-            while (((double) robot.bottomColor.red() < 40) && ((double) robot.bottomColor.blue() < 40) && ((double) robot.bottomColor.green() < 40)) {
-                whileAutoPilot(1.57, 1.57, .4);
-            }
-            runtime.reset();
-            autoPilot(1.1, 1.57, 117.5, 0.6 - runtime.seconds() / 7, 10);
-            //drop rings
-            waitMilis(200);
-            autoPilot(4.71, 1.57, 100, .6, 10);
-            autoPilot(3.14, 1.57, 105, .7, 10);
-            waitMilis(10);
-            //grab wobble
-            autoPilot(4.71, 4.71, 88, .7, 10);
+            autoPilot(1.57, 1.57, 190, .4, 10);
+//            while (((double) robot.bottomColor.red() < 40) && ((double) robot.bottomColor.blue() < 40) && ((double) robot.bottomColor.green() < 40)) {
+//                whileAutoPilot(1.57, 1.57, .4);
+//            }
 //            runtime.reset();
-//            while (((double) robot.bottomColor.red() < 28) && (runtime.seconds() < 4)) {
-//                whileAutoPilot(0, 4.71, .2);
+//            autoPilot(1.1, 1.57, 117.5, 0.6 - runtime.seconds() / 7, 10);
+//            //drop rings
+//            waitMilis(200);
+//            autoPilot(4.71, 1.57, 100, .6, 10);
+//            autoPilot(3.14, 1.57, 105, .7, 10);
+//            waitMilis(10);
+//            //grab wobble
+//            autoPilot(4.71, 4.71, 88, .7, 10);
+////            runtime.reset();
+////            while (((double) robot.bottomColor.red() < 28) && (runtime.seconds() < 4)) {
+////                whileAutoPilot(0, 4.71, .2);
+////            }
+////            autoPilot(3.14, 4.71, 37, .7, 10);
+//            autoPilot(4.71, 4.71, 4, .7, 10);
+//            waitMilis(200);
+//            waitMilis(1000);
+//            autoPilot(1.57, 0, 100, .7, 10);
+//            while (((double) robot.bottomColor.red() < 40) && ((double) robot.bottomColor.blue() < 40) && ((double) robot.bottomColor.green() < 40)) {
+//                whileAutoPilot(1.57, 0, .4);
 //            }
-//            autoPilot(3.14, 4.71, 37, .7, 10);
-            autoPilot(4.71, 4.71, 4, .7, 10);
-            waitMilis(200);
-            waitMilis(1000);
-            autoPilot(1.57, 0, 100, .7, 10);
-            while (((double) robot.bottomColor.red() < 40) && ((double) robot.bottomColor.blue() < 40) && ((double) robot.bottomColor.green() < 40)) {
-                whileAutoPilot(1.57, 0, .4);
-            }
-            autoPilot(0, 0, 85, 0.5, 10);
-            waitMilis(600);
-            autoPilot(3.14, 0, 75, 0.7, 10);
-//            while (((double) robot.bottomColor.red() < 40) & ((double) robot.bottomColor.blue() < 40) & ((double) robot.bottomColor.green() < 40)) {
-//                whileAutoPilot(4.71, 1.57, .75);
-//            }
+//            autoPilot(0, 0, 85, 0.5, 10);
+//            waitMilis(600);
+//            autoPilot(3.14, 0, 75, 0.7, 10);
+////            while (((double) robot.bottomColor.red() < 40) & ((double) robot.bottomColor.blue() < 40) & ((double) robot.bottomColor.green() < 40)) {
+////                whileAutoPilot(4.71, 1.57, .75);
+////            }
 
             stop();
         }
