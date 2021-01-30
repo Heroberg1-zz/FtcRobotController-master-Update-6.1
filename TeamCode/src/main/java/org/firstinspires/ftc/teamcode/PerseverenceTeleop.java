@@ -274,50 +274,49 @@ PerseverenceTeleop extends LinearOpMode {
                 }
             }
             //choker
-//            if (gamepad2.x && !(3/*Volts*/ <= robot.chokerSwitch.getVoltage())) {
-//                robot.choker.setPower(1);
-//            } else if (gamepad2.y) {
-//                robot.choker.setPower(-1);
-//            } else {
-//                robot.choker.setPower(0);
-//            }
             robot.choker.setPower(gamepad2.left_stick_y * .8);
 
             // arm
             robot.arm.setPower(gamepad2.right_stick_y * .8);
+
             //escapement servo
+            if (robot.escapeSensor.getDistance(DistanceUnit.CM) > 5) {
+                robot.escapeServo.setPosition(.05);
+            } else if (robot.escapeSensor.getDistance(DistanceUnit.CM) < 5) {
+
             switch (escape) {
                 case 0:
                     escape++;
-                    break;
-                case 1:
-                    if (gamepad2.a) {
-                        oldTime = runtime.milliseconds();
-                        robot.escapeServo.setPosition(0.05);
-                        robot.finalEscapeServo.setPosition(0);
-                        longEscape = false;
-                        escape++;
-                    } else if (gamepad2.b) {
-                        oldTime = runtime.milliseconds();
-                        robot.escapeServo.setPosition(0.05);
-                        robot.finalEscapeServo.setPosition(0);
-                        longEscape = true;
-                        escape++;
-                }
-                    break;
-                case 2:
-                    if (runtime.milliseconds() > oldTime + 400 && !longEscape) {
-                        robot.escapeServo.setPosition(.2);
-                        robot.finalEscapeServo.setPosition(.2);
-                        escape = 0;
-                    } else if (runtime.milliseconds() > oldTime +2000 && longEscape){
-                        robot.escapeServo.setPosition(.2);
-                        robot.finalEscapeServo.setPosition(.2);
-                        escape = 0;
-                    }else {
                         break;
+                        case 1:
+                            if (gamepad2.a) {
+                                oldTime = runtime.milliseconds();
+                                robot.finalEscapeServo.setPosition(0);
+                                longEscape = false;
+                                escape++;
+                            } else if (gamepad2.b) {
+                                oldTime = runtime.milliseconds();
+                                robot.finalEscapeServo.setPosition(0);
+                                longEscape = true;
+                                escape++;
+                            }
+                            break;
+                        case 2:
+                            if (runtime.milliseconds() > oldTime + 400 && !longEscape) {
+                                robot.escapeServo.setPosition(.2);
+                                robot.finalEscapeServo.setPosition(.2);
+                                escape = 0;
+                            } else if (runtime.milliseconds() > oldTime + 2000 && longEscape) {
+                                robot.escapeServo.setPosition(.2);
+                                robot.finalEscapeServo.setPosition(.2);
+                                escape = 0;
+                            } else {
+                                break;
+                            }
+                            telemetry.addData("Escapement Sensor", robot.escapeSensor.getDistance(DistanceUnit.CM));
                     }
             }
+
             //Roller
             if (gamepad2.right_trigger > .5) {
                 robot.rollers.setPower(1.0);
