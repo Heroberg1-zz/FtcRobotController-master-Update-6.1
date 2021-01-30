@@ -30,13 +30,11 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -86,8 +84,8 @@ public class HardwarePerseverence {
      * Digital
      */
     public AnalogInput chokerSwitch = null;
- //   public AnalogInput leftMarker = null;
-  //  public AnalogInput rightMarker = null;
+    //   public AnalogInput leftMarker = null;
+    //  public AnalogInput rightMarker = null;
     /**
      * I2C
      */
@@ -130,11 +128,11 @@ public class HardwarePerseverence {
         /** Analog */
         /** Digital */
         chokerSwitch = hwMap.get(AnalogInput.class, "chokerSwitch");
-      //  leftMarker = hwMap.get(AnalogInput.class, "leftMarker");
-     //   rightMarker = hwMap.get(AnalogInput.class, "rightMarker");
+        //  leftMarker = hwMap.get(AnalogInput.class, "leftMarker");
+        //   rightMarker = hwMap.get(AnalogInput.class, "rightMarker");
         /** I2C */
         bottomColor = hwMap.get(ColorSensor.class, "bottomColor");
-        escapeSensor = hwMap.get(Rev2mDistanceSensor.class,"escapeSensor");
+        escapeSensor = hwMap.get(Rev2mDistanceSensor.class, "escapeSensor");
         /** USB */
         webcam = hwMap.get(WebcamName.class, "webcam");
         leftDrive.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
@@ -162,6 +160,10 @@ public class HardwarePerseverence {
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flyWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 

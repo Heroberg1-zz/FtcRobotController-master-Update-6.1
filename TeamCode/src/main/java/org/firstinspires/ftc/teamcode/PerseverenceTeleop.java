@@ -306,7 +306,7 @@ PerseverenceTeleop extends LinearOpMode {
                     if (runtime.milliseconds() > oldTime + 400 && !longEscape) {
                         robot.finalEscapeServo.setPosition(closedEscape);
                         escape++;
-                    } else if (runtime.milliseconds() > oldTime + 2000 && longEscape) {
+                    } else if (runtime.milliseconds() > oldTime + 2500 && longEscape) {
                         robot.finalEscapeServo.setPosition(closedEscape);
                         escape++;
                     } else {
