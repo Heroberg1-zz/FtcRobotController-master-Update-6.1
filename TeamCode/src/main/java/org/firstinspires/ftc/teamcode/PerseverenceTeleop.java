@@ -151,6 +151,7 @@ PerseverenceTeleop extends LinearOpMode {
         double driveSpeed;
         int escape = 0;
         double oldTime = 0.0;
+        boolean longEscape = false;
 
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
@@ -272,17 +273,19 @@ PerseverenceTeleop extends LinearOpMode {
                     break;
                 }
             }
-//choker
-            if (gamepad2.x && !(3/*Volts*/ <= robot.chokerSwitch.getVoltage())) {
-                robot.choker.setPower(1);
-            } else if (gamepad2.y) {
-                robot.choker.setPower(-1);
-            } else {
-                robot.choker.setPower(0);
-            }
+            //choker
+//            if (gamepad2.x && !(3/*Volts*/ <= robot.chokerSwitch.getVoltage())) {
+//                robot.choker.setPower(1);
+//            } else if (gamepad2.y) {
+//                robot.choker.setPower(-1);
+//            } else {
+//                robot.choker.setPower(0);
+//            }
+            robot.choker.setPower(gamepad2.left_stick_y * .8);
+
             // arm
             robot.arm.setPower(gamepad2.right_stick_y * .8);
-            //escapment servo
+            //escapement servo
             switch (escape) {
                 case 0:
                     escape++;
@@ -290,18 +293,32 @@ PerseverenceTeleop extends LinearOpMode {
                 case 1:
                     if (gamepad2.a) {
                         oldTime = runtime.milliseconds();
+                        robot.escapeServo.setPosition(0.05);
                         robot.finalEscapeServo.setPosition(0);
+                        longEscape = false;
                         escape++;
-                    }
+                    } else if (gamepad2.b) {
+                        oldTime = runtime.milliseconds();
+                        robot.escapeServo.setPosition(0.05);
+                        robot.finalEscapeServo.setPosition(0);
+                        longEscape = true;
+                        escape++;
+                }
                     break;
                 case 2:
-                    if (runtime.milliseconds() > oldTime + 2000) {
+                    if (runtime.milliseconds() > oldTime + 400 && !longEscape) {
+                        robot.escapeServo.setPosition(.2);
                         robot.finalEscapeServo.setPosition(.2);
                         escape = 0;
-                    } else {
+                    } else if (runtime.milliseconds() > oldTime +2000 && longEscape){
+                        robot.escapeServo.setPosition(.2);
+                        robot.finalEscapeServo.setPosition(.2);
+                        escape = 0;
+                    }else {
                         break;
                     }
             }
+            //Roller
             if (gamepad2.right_trigger > .5) {
                 robot.rollers.setPower(1.0);
             } else if (gamepad2.left_trigger > .5) {
@@ -314,7 +331,7 @@ PerseverenceTeleop extends LinearOpMode {
             //robot.aimbot.setPosition(.6);
 
 
-            //looking glass
+            //looking glass/shooter off
             if (gamepad2.dpad_up) {
                 robot.lookingGlass.setPower(1);
             } else if (gamepad2.dpad_down) {
@@ -323,10 +340,17 @@ PerseverenceTeleop extends LinearOpMode {
                 robot.lookingGlass.setPower(0);
                 robot.flyWheel.setPower(0);
             }
-
+            //shooter on
             if (gamepad2.dpad_left) {
                 robot.flyWheel.setPower(1);
             }
+
+            //power shots
+            if (gamepad2.y) {
+
+            }
+            telemetry.addLine("DON'T PRESS Y");
+
             double rightX = gamepad1.right_stick_x;
             r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
             robotAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
@@ -340,10 +364,9 @@ PerseverenceTeleop extends LinearOpMode {
             robot.rightBackDrive.setPower(v4);
 
             // Send telemetry message to signify robot running;
-            double currentHeading = -imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            double currentHeading = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             double headingRadians = -((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416);
             telemetry.addLine("IMU");
-            telemetry.addData("Heading", headingRadians);
             // Provide feedback as to where the robot is located (if we know).
             if (targetVisible) {
                 // express position (translation) of robot in inches.
