@@ -6,9 +6,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwarePerseverence;
 
-@TeleOp(name = "Motor Test", group = "Pushbot")
+@TeleOp(name = "Motor Test", group = "TeleOp")
 public class PerseverenceMotorTest extends LinearOpMode {
     HardwarePerseverence robot = new HardwarePerseverence();
     private final ElapsedTime runtime = new ElapsedTime();
@@ -62,5 +63,10 @@ public class PerseverenceMotorTest extends LinearOpMode {
 //        waitMilis(5000);
 //        robot.flyWheel.setPower(0);
 //    }
+        waitForStart();
+       while (opModeIsActive())  {
+           telemetry.addData("Centimeters",robot.escapeSensor.getDistance(DistanceUnit.CM));
+           telemetry.update();
+        }
     }
 }

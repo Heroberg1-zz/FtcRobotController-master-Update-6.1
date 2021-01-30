@@ -29,12 +29,14 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -89,7 +91,7 @@ public class HardwarePerseverence {
     /**
      * I2C
      */
-    public RevColorSensorV3 escapeSensor = null;
+    public Rev2mDistanceSensor escapeSensor = null;
     public ColorSensor bottomColor = null;
     /**
      * USB
@@ -132,7 +134,7 @@ public class HardwarePerseverence {
      //   rightMarker = hwMap.get(AnalogInput.class, "rightMarker");
         /** I2C */
         bottomColor = hwMap.get(ColorSensor.class, "bottomColor");
-        escapeSensor = hwMap.get(RevColorSensorV3.class,"escapeSensor");
+        escapeSensor = hwMap.get(Rev2mDistanceSensor.class,"escapeSensor");
         /** USB */
         webcam = hwMap.get(WebcamName.class, "webcam");
         leftDrive.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
@@ -160,7 +162,7 @@ public class HardwarePerseverence {
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flyWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
         // Define and initialize ALL installed servos.

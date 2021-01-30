@@ -48,6 +48,7 @@ import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
@@ -294,17 +295,24 @@ PerseverenceTeleop extends LinearOpMode {
                     }
                     break;
                 case 2:
-                    if (runtime.milliseconds() > oldTime + 1000) {
+                    if (runtime.milliseconds() > oldTime + 2000) {
                         robot.finalEscapeServo.setPosition(.2);
                         escape = 0;
                     } else {
                         break;
                     }
             }
-            robot.rollers.setPower(gamepad2.left_trigger);
-            robot.rollers.setPower(-gamepad2.right_trigger);
+            if (gamepad2.right_trigger > .5) {
+                robot.rollers.setPower(1.0);
+            } else if (gamepad2.left_trigger > .5) {
+                robot.rollers.setPower(-1.0);
+            } else {
+                robot.rollers.setPower(0.0);
+            }
+
             //aim
             //robot.aimbot.setPosition(.6);
+
 
             //looking glass
             if (gamepad2.dpad_up) {
@@ -316,44 +324,45 @@ PerseverenceTeleop extends LinearOpMode {
                 robot.flyWheel.setPower(0);
             }
 
-                if (gamepad2.dpad_left) {
-                    robot.flyWheel.setPower(1);
-                }
-                double rightX = gamepad1.right_stick_x;
-                r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
-                robotAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
-                final double v1 = r * Math.cos(robotAngle) + rightX;
-                final double v2 = r * Math.sin(robotAngle) - rightX;
-                final double v3 = r * Math.sin(robotAngle) + rightX;
-                final double v4 = r * Math.cos(robotAngle) - rightX;
-                robot.leftDrive.setPower(v1);
-                robot.rightDrive.setPower(v2);
-                robot.leftBackDrive.setPower(v3);
-                robot.rightBackDrive.setPower(v4);
-
-                // Send telemetry message to signify robot running;
-                double currentHeading = -imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-                double headingRadians = -((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416);
-                telemetry.addLine("IMU");
-                telemetry.addData("Heading", headingRadians);
-                // Provide feedback as to where the robot is located (if we know).
-                if (targetVisible) {
-                    // express position (translation) of robot in inches.
-                    VectorF translation = lastLocation.getTranslation();
-                    telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
-                            translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
-
-                    // express the rotation of the robot in degrees.
-                    Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
-                    telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-                } else {
-                    telemetry.addData("Visible Target", "none");
-                }
-                telemetry.update();
+            if (gamepad2.dpad_left) {
+                robot.flyWheel.setPower(1);
             }
-        targetsUltimateGoal.deactivate();
-        }
+            double rightX = gamepad1.right_stick_x;
+            r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
+            robotAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
+            final double v1 = r * Math.cos(robotAngle) + rightX;
+            final double v2 = r * Math.sin(robotAngle) - rightX;
+            final double v3 = r * Math.sin(robotAngle) + rightX;
+            final double v4 = r * Math.cos(robotAngle) - rightX;
+            robot.leftDrive.setPower(v1);
+            robot.rightDrive.setPower(v2);
+            robot.leftBackDrive.setPower(v3);
+            robot.rightBackDrive.setPower(v4);
 
+            // Send telemetry message to signify robot running;
+            double currentHeading = -imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            double headingRadians = -((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416);
+            telemetry.addLine("IMU");
+            telemetry.addData("Heading", headingRadians);
+            // Provide feedback as to where the robot is located (if we know).
+            if (targetVisible) {
+                // express position (translation) of robot in inches.
+                VectorF translation = lastLocation.getTranslation();
+                telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+                        translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
+
+                // express the rotation of the robot in degrees.
+                Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+                telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+            } else {
+                telemetry.addData("Visible Target", "none");
+            }
+            telemetry.addData("Centimeters", robot.escapeSensor.getDistance(DistanceUnit.CM));
+            telemetry.update();
+        }
+        targetsUltimateGoal.deactivate();
     }
+
+}
 
 
