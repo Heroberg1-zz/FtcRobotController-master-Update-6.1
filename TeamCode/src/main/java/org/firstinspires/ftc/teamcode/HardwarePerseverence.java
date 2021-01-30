@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -91,12 +92,13 @@ public class HardwarePerseverence {
     /**
      * I2C
      */
-    public Rev2mDistanceSensor escapeSensor = null;
+    public DistanceSensor escapeSensor = null;
     public ColorSensor bottomColor = null;
     /**
      * USB
      */
     public CameraName webcam = null;
+    //public RevBlinkinLedDriver light = null;
 
     /* local OpMode members. */
     HardwareMap hwMap = null;
@@ -134,9 +136,10 @@ public class HardwarePerseverence {
      //   rightMarker = hwMap.get(AnalogInput.class, "rightMarker");
         /** I2C */
         bottomColor = hwMap.get(ColorSensor.class, "bottomColor");
-        escapeSensor = hwMap.get(Rev2mDistanceSensor.class,"escapeSensor");
+        escapeSensor = hwMap.get(DistanceSensor.class,"escapeSensor");
         /** USB */
         webcam = hwMap.get(WebcamName.class, "webcam");
+        //light = hwMap.get(RevBlinkinLedDriver.class, "light");
         leftDrive.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
         rightDrive.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
         leftBackDrive.setDirection(DcMotor.Direction.FORWARD);

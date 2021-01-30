@@ -33,12 +33,19 @@ package org.firstinspires.ftc.teamcode;
 //import com.arcrobotics.ftclib.geometry.Rotation2d;
 //import com.arcrobotics.ftclib.geometry.Transform2d;
 
+import android.content.Context;
+import android.hardware.biometrics.BiometricPrompt;
+
+import androidx.renderscript.RenderScript;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Hardware;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.BasicOpMode_Iterative;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -88,6 +95,8 @@ PerseverenceTeleop extends LinearOpMode {
     HardwarePerseverence robot = new HardwarePerseverence();
     private BNO055IMU imu;
     private final ElapsedTime runtime = new ElapsedTime();
+    private HardwareMap hardware = null;
+
 
     public void waitMilis(double timeOutMs) {
 
@@ -357,7 +366,6 @@ PerseverenceTeleop extends LinearOpMode {
             } else {
                 telemetry.addData("Visible Target", "none");
             }
-            telemetry.addData("Centimeters", robot.escapeSensor.getDistance(DistanceUnit.CM));
             telemetry.update();
         }
         targetsUltimateGoal.deactivate();

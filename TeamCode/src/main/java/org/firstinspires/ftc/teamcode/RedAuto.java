@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -20,6 +21,7 @@ public class RedAuto extends LinearOpMode {
     private final ElapsedTime runtime = new ElapsedTime();
     private BNO055IMU imu;
     Orientation angles;
+    Camera camera = new Camera(robot, imu, hardwareMap);
     static final double COUNTS_PER_MOTOR_REV = 537.6;
     static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_CENTIMETERS = 10.16;     // For figuring circumference
