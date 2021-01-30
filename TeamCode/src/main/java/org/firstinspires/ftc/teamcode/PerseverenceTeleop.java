@@ -34,15 +34,12 @@ package org.firstinspires.ftc.teamcode;
 //import com.arcrobotics.ftclib.geometry.Transform2d;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcontroller.external.samples.BasicOpMode_Iterative;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -54,7 +51,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import org.firstinspires.ftc.teamcode.HardwarePerseverence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -152,6 +148,8 @@ PerseverenceTeleop extends LinearOpMode {
         int escape = 0;
         double oldTime = 0.0;
         boolean longEscape = false;
+        double openEscape = 0;
+        double closedEscape = .2;
 
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
@@ -248,6 +246,7 @@ PerseverenceTeleop extends LinearOpMode {
         robot.leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // Send telemetry message to signify robot waiting;
+        robot.escapeServo.setPosition(openEscape);
         telemetry.addData("Pushbot:", "Hello Driver");    //
         telemetry.update();
 
@@ -280,40 +279,48 @@ PerseverenceTeleop extends LinearOpMode {
             robot.arm.setPower(gamepad2.right_stick_y * .8);
 
             //escapement servo
-            if (robot.escapeSensor.getDistance(DistanceUnit.CM) > 5) {
-                robot.escapeServo.setPosition(.05);
-            } else if (robot.escapeSensor.getDistance(DistanceUnit.CM) < 5) {
+//            if (robot.escapeSensor.getDistance(DistanceUnit.CM) > 5) {
+//                robot.escapeServo.setPosition(.05);
+//            } else if (robot.escapeSensor.getDistance(DistanceUnit.CM) < 5) {
 
             switch (escape) {
                 case 0:
                     escape++;
+                    break;
+                case 1:
+                    if (gamepad2.a) {
+                        oldTime = runtime.milliseconds();
+                        robot.escapeServo.setPosition(openEscape);
+                        robot.finalEscapeServo.setPosition(openEscape);
+                        longEscape = false;
+                        escape++;
+                    } else if (gamepad2.b) {
+                        oldTime = runtime.milliseconds();
+                        robot.escapeServo.setPosition(openEscape);
+                        robot.finalEscapeServo.setPosition(openEscape);
+                        longEscape = true;
+                        escape++;
+                    }
+                    break;
+                case 2:
+                    if (runtime.milliseconds() > oldTime + 400 && !longEscape) {
+                        robot.finalEscapeServo.setPosition(closedEscape);
+                        escape++;
+                    } else if (runtime.milliseconds() > oldTime + 2000 && longEscape) {
+                        robot.finalEscapeServo.setPosition(closedEscape);
+                        escape++;
+                    } else {
                         break;
-                        case 1:
-                            if (gamepad2.a) {
-                                oldTime = runtime.milliseconds();
-                                robot.finalEscapeServo.setPosition(0);
-                                longEscape = false;
-                                escape++;
-                            } else if (gamepad2.b) {
-                                oldTime = runtime.milliseconds();
-                                robot.finalEscapeServo.setPosition(0);
-                                longEscape = true;
-                                escape++;
-                            }
-                            break;
-                        case 2:
-                            if (runtime.milliseconds() > oldTime + 400 && !longEscape) {
-                                robot.escapeServo.setPosition(.2);
-                                robot.finalEscapeServo.setPosition(.2);
-                                escape = 0;
-                            } else if (runtime.milliseconds() > oldTime + 2000 && longEscape) {
-                                robot.escapeServo.setPosition(.2);
-                                robot.finalEscapeServo.setPosition(.2);
-                                escape = 0;
-                            } else {
-                                break;
-                            }
-                            telemetry.addData("Escapement Sensor", robot.escapeSensor.getDistance(DistanceUnit.CM));
+                    }
+                case 3:
+                    if (robot.escapeSensor.getDistance(DistanceUnit.CM) > 5) {
+                        robot.escapeServo.setPosition(openEscape);
+                    } else if (robot.escapeSensor.getDistance(DistanceUnit.CM) < 5) {
+                        telemetry.addData("Escapement Sensor", robot.escapeSensor.getDistance(DistanceUnit.CM));
+                        robot.escapeServo.setPosition(closedEscape);
+                        escape = 0;
+                    } else {
+                        break;
                     }
             }
 
