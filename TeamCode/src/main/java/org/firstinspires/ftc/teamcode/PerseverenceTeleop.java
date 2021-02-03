@@ -273,16 +273,12 @@ PerseverenceTeleop extends LinearOpMode {
                 }
             }
             //choker
-            robot.choker.setPower(gamepad2.left_stick_y * .8);
+            robot.choker.setPower(gamepad2.left_stick_y);
 
             // arm
-            robot.arm.setPower(gamepad2.right_stick_y * .8);
+            robot.arm.setPower(gamepad2.right_stick_y * .6);
 
-            //escapement servo
-//            if (robot.escapeSensor.getDistance(DistanceUnit.CM) > 5) {
-//                robot.escapeServo.setPosition(.05);
-//            } else if (robot.escapeSensor.getDistance(DistanceUnit.CM) < 5) {
-
+            //escape
             switch (escape) {
                 case 0:
                     escape++;
@@ -350,14 +346,15 @@ PerseverenceTeleop extends LinearOpMode {
             if (gamepad2.dpad_left) {
                 robot.flyWheel.setPower(1);
             }
-
-            //power shots
+     //power shots
+     //power shots
+     //power shots
+     //power shots
+     //power shots
             if (gamepad2.y) {
 
             }
             telemetry.addLine("DON'T PRESS Y");
-
-            // drive
 
             // slow mode
             if (gamepad1.right_trigger > 0.5) {
@@ -365,6 +362,8 @@ PerseverenceTeleop extends LinearOpMode {
             } else {
                 driveSpeed = 1;
             }
+
+            // drive
             double rightX = gamepad1.right_stick_x;
             r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
             robotAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
