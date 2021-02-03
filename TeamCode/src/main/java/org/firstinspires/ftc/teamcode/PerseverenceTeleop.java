@@ -357,6 +357,14 @@ PerseverenceTeleop extends LinearOpMode {
             }
             telemetry.addLine("DON'T PRESS Y");
 
+            // drive
+
+            // slow mode
+            if (gamepad1.right_trigger > 0.5) {
+                driveSpeed = 0.5;
+            } else {
+                driveSpeed = 1;
+            }
             double rightX = gamepad1.right_stick_x;
             r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
             robotAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
@@ -364,10 +372,10 @@ PerseverenceTeleop extends LinearOpMode {
             final double v2 = r * Math.sin(robotAngle) - rightX;
             final double v3 = r * Math.sin(robotAngle) + rightX;
             final double v4 = r * Math.cos(robotAngle) - rightX;
-            robot.leftDrive.setPower(v1);
-            robot.rightDrive.setPower(v2);
-            robot.leftBackDrive.setPower(v3);
-            robot.rightBackDrive.setPower(v4);
+            robot.leftDrive.setPower(v1 * driveSpeed);
+            robot.rightDrive.setPower(v2 * driveSpeed);
+            robot.leftBackDrive.setPower(v3 * driveSpeed);
+            robot.rightBackDrive.setPower(v4 * driveSpeed);
 
             // Send telemetry message to signify robot running;
             double currentHeading = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
