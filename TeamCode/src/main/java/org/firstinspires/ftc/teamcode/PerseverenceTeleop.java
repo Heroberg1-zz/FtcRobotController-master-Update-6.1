@@ -323,10 +323,13 @@ PerseverenceTeleop extends LinearOpMode {
             //Roller
             if (gamepad2.right_trigger > .5) {
                 robot.rollers.setPower(1.0);
+                robot.peewee.setPower(-1.0);
             } else if (gamepad2.left_trigger > .5) {
                 robot.rollers.setPower(-1.0);
+                robot.peewee.setPower(1.0);
             } else {
                 robot.rollers.setPower(0.0);
+                robot.peewee.setPower(0.0);
             }
 
             //aim
@@ -352,7 +355,28 @@ PerseverenceTeleop extends LinearOpMode {
      //power shots
      //power shots
             if (gamepad2.y) {
-
+//                //shoot ring without camera
+//                robot.escapeServo.setPosition(openEscape);
+//                robot.finalEscapeServo.setPosition(openEscape);
+//                waitMilis(400);
+//                robot.escapeServo.setPosition(closedEscape);
+//                robot.finalEscapeServo.setPosition(closedEscape);
+//
+//                //strafe right 19.25 cm
+//
+//                robot.escapeServo.setPosition(openEscape);
+//                robot.finalEscapeServo.setPosition(openEscape);
+//                waitMilis(400);
+//                robot.escapeServo.setPosition(closedEscape);
+//                robot.finalEscapeServo.setPosition(closedEscape);
+//
+//                //strafe right 19.25 cm
+//
+//                robot.escapeServo.setPosition(openEscape);
+//                robot.finalEscapeServo.setPosition(openEscape);
+//                waitMilis(400);
+//                robot.escapeServo.setPosition(closedEscape);
+//                robot.finalEscapeServo.setPosition(closedEscape);
             }
             telemetry.addLine("DON'T PRESS Y");
 

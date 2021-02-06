@@ -67,7 +67,7 @@ public class HardwarePerseverence {
     public DcMotor rightDrive = null;
     public DcMotor leftBackDrive = null;
     public DcMotor rightBackDrive = null;
-    //public DcMotor tendrails = null;
+    public DcMotor peewee = null;
     public DcMotor rollers = null;
     public DcMotor lookingGlass = null;
     public DcMotor flyWheel = null;
@@ -115,7 +115,7 @@ public class HardwarePerseverence {
         rightDrive = hwMap.get(DcMotor.class, "rd");
         leftBackDrive = hwMap.get(DcMotor.class, "lbd");
         rightBackDrive = hwMap.get(DcMotor.class, "rbd");
-        //tendrails = hwMap.get(DcMotor.class, "tendrails");
+        peewee = hwMap.get(DcMotor.class, "peewee");
         rollers = hwMap.get(DcMotor.class, "roller");
         lookingGlass = hwMap.get(DcMotor.class, "lookingGlass");
         flyWheel = hwMap.get(DcMotor.class, "flyWheel");
@@ -147,12 +147,12 @@ public class HardwarePerseverence {
         rightDrive.setPower(0);
         leftBackDrive.setPower(0);
         rightBackDrive.setPower(0);
-        //tendrails.setPower(0);
+        peewee.setPower(0);
         rollers.setPower(0);
         lookingGlass.setPower(0);
         flyWheel.setPower(0);
         // Set all motors to run without encoders.
-        //tendrails.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        peewee.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rollers.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lookingGlass.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // May want to use RUN_USING_ENCODERS if encoders are installed.
