@@ -141,6 +141,14 @@ PerseverenceTeleop extends LinearOpMode {
     private float phoneYRotate = 0;
     private final float phoneZRotate = 0;
 
+    static final double COUNTS_PER_MOTOR_REV = 537.6;
+    static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
+    static final double WHEEL_DIAMETER_CENTIMETERS = 10.16;     // For figuring circumference
+    static final double COUNTS_PER_CENTIMETER = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_CENTIMETERS * 3.1415);
+    static final double DRIVE_SPEED = 1.0;
+    static final double TURN_SPEED = 0.8;
+    static final double DIST_PER_REV = (10 * Math.PI) / COUNTS_PER_MOTOR_REV;
+
     /**
      * This is the webcam we are to use. As with other hardware devices such as motors and
      * servos, this device is identified using the robot configuration tool in the FTC application.
@@ -201,7 +209,7 @@ PerseverenceTeleop extends LinearOpMode {
 
         // The tower goal targets are located a quarter field length from the ends of the back perimeter wall.
         blueTowerGoalTarget.setLocation(OpenGLMatrix
-                .translation(halfField, quadField, mmTargetHeight)
+                .translation(halfField, quadField + 2, mmTargetHeight) /** Adjusted for our feild **/
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
         redTowerGoalTarget.setLocation(OpenGLMatrix
                 .translation(halfField, -quadField, mmTargetHeight)
@@ -225,7 +233,7 @@ PerseverenceTeleop extends LinearOpMode {
         // Next, translate the camera lens to where it is on the robot.
         // In this example, it is centered (left to right), but forward of the middle of the robot, and above ground level.
         final float CAMERA_FORWARD_DISPLACEMENT = 8.5f * mmPerInch;   // eg: Camera is 4 Inches in front of robot-center
-        final float CAMERA_VERTICAL_DISPLACEMENT = 13.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
+        final float CAMERA_VERTICAL_DISPLACEMENT = 13.5f * mmPerInch;   // eg: Camera is 8 Inches above ground
         final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the robot's center line
 
         OpenGLMatrix robotFromCamera = OpenGLMatrix
@@ -353,6 +361,8 @@ PerseverenceTeleop extends LinearOpMode {
             double headingRadians = -((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416);
             telemetry.addData("Heading", headingRadians);
             // Provide feedback as to where the robot is located (if we know).
+            telemetry.addData("Distance", robot.frontDistance.getDistance(DistanceUnit.INCH));
+            telemetry.addData("Angle", currentHeading);
             autoAim();
             telemetry.update();
         }
@@ -373,12 +383,136 @@ PerseverenceTeleop extends LinearOpMode {
             // express the rotation of the robot in degrees.
             Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
             telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-            float x = translation.get(0);
-            float y = translation.get(1);
+            float x1 = 2;
+            float y1 = -15;
+
+            double x2 = -72 + robot.frontDistance.getDistance(DistanceUnit.INCH);
+            float y2 = translation.get(1);
+
+            double dx;
+            double dy;
+            double translationDistance;
+            double translationAngle;
+
+            if (gamepad1.a) {
+                while (robot.frontDistance.getDistance(DistanceUnit.INCH) > 322 /** add timeout **/) {
+                    robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    robot.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    robot.leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    robot.leftDrive.setPower(1.0);
+                    robot.rightDrive.setPower(1.0);
+                    robot.leftBackDrive.setPower(1.0);
+                    robot.rightBackDrive.setPower(1.0);
+                }
+                robot.leftDrive.setPower(0);
+                robot.rightDrive.setPower(0);
+                robot.leftBackDrive.setPower(0);
+                robot.rightBackDrive.setPower(0);
+                dx = x1 - x2;
+                dy = y1 - y2;
+                translationDistance = (dx * dx) + (dy * dy);
+                translationDistance = Math.sqrt(translationDistance);
+                telemetry.addData("dx", dx);
+                telemetry.addData("dy", dy);
+                telemetry.addData("Distance", translationDistance);
+                translationAngle = Math.atan(dx / dy);
+                telemetry.addData("Angle", translationAngle);
+
+            }
 
 
         } else {
             telemetry.addData("Visible Target", "none");
+        }
+    }
+    public double subtractAngle(double angleA,
+                                double angleB) {
+        double result;
+        result = angleA - angleB;
+        if (result > 180) {
+            result = result - 360;
+        }
+        return result;
+    }
+    public void autoPilot(double heading,
+                          double pose,
+                          double distance,
+                          double power,
+                          double timeoutS) {
+
+        double currentHeading;
+        double drvPower = power;
+        double adjPower;
+        double currentDistance;
+        double driveAngle;
+        double headingRadians;
+        double poseDegrees;
+        double distX = 0;
+        double distY = 0;
+        double dY;
+        double dX;
+        double oldLeft = robot.leftDrive.getCurrentPosition();
+        double oldRight = robot.rightDrive.getCurrentPosition();
+        double oldBackLeft = robot.leftBackDrive.getCurrentPosition();
+        double oldBackRight = robot.rightBackDrive.getCurrentPosition();
+        double newLeft = 0;
+        double newRight = 0;
+        double newBackLeft = 0;
+        double newBackRight = 0;
+        runtime.reset();
+        while ((runtime.seconds() < timeoutS)) {
+            currentHeading = (imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+            headingRadians = ((imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS).firstAngle) + (2.5 * Math.PI)) % (2 * Math.PI);
+            poseDegrees = ((pose - 3.1416 / 2) % (2 * 3.1416)) * (360 / (2 * 3.1416));
+            if (poseDegrees > 180) {
+                poseDegrees -= 360;
+            }
+            if (poseDegrees < -180) {
+                poseDegrees += 360;
+            }
+            driveAngle = subtractAngle(poseDegrees, currentHeading);
+            adjPower = subtractAngle(poseDegrees, currentHeading) / 120;
+            newLeft = robot.leftDrive.getCurrentPosition();
+            newRight = robot.rightDrive.getCurrentPosition();
+            newBackRight = robot.rightBackDrive.getCurrentPosition();
+            newBackLeft = robot.leftBackDrive.getCurrentPosition();
+
+            dX = ((((newLeft - oldLeft) - (newBackLeft - oldBackLeft)
+                    - (newRight - oldRight) + (newBackRight - oldBackRight)) * Math.sin(Math.PI / 2)) / 4.0) * DIST_PER_REV;
+            dY = (((newLeft - oldLeft) + (newBackLeft - oldBackLeft)
+                    + (newRight - oldRight) + (newBackRight - oldBackRight)) / 4.0) * DIST_PER_REV;
+            distX += (Math.sin(headingRadians) * dX + Math.cos(headingRadians) * dY);
+            distY += (Math.sin(headingRadians) * dY + Math.cos(headingRadians) * dX);
+            oldLeft = newLeft;
+            oldRight = newRight;
+            oldBackLeft = newBackLeft;
+            oldBackRight = newBackRight;
+
+            currentDistance = Math.sqrt(distX * distX + distY * distY);
+            if (currentDistance > distance) {
+                robot.leftDrive.setPower(0);
+                robot.leftBackDrive.setPower(0);
+                robot.rightDrive.setPower(0);
+                robot.rightBackDrive.setPower(0);
+                return;
+            }
+
+            driveAngle = ((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416) + heading;
+//            driveAngle = 0.5*Math.PI;
+//            adjPower = 0;
+
+            double robotAngle = driveAngle - Math.PI / 4;
+            final double v1 = power * Math.cos(robotAngle) - adjPower;
+            final double v2 = power * Math.sin(robotAngle) + adjPower;
+            final double v3 = power * Math.sin(robotAngle) - adjPower;
+            final double v4 = power * Math.cos(robotAngle) + adjPower;
+
+
+            robot.leftDrive.setPower(v1);
+            robot.rightDrive.setPower(v2);
+            robot.leftBackDrive.setPower(v3);
+            robot.rightBackDrive.setPower(v4);
         }
     }
 

@@ -94,6 +94,7 @@ public class HardwarePerseverence {
      */
     public DistanceSensor escapeSensor = null;
     public ColorSensor bottomColor = null;
+    public DistanceSensor frontDistance = null;
     /**
      * USB
      */
@@ -137,6 +138,7 @@ public class HardwarePerseverence {
         /** I2C */
         bottomColor = hwMap.get(ColorSensor.class, "bottomColor");
         escapeSensor = hwMap.get(DistanceSensor.class,"escapeSensor");
+        frontDistance = hwMap.get(DistanceSensor.class, "frontDistance");
         /** USB */
         webcam = hwMap.get(WebcamName.class, "webcam");
         //light = hwMap.get(RevBlinkinLedDriver.class, "light");
