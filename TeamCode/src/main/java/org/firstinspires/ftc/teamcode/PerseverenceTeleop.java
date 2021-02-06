@@ -290,8 +290,7 @@ PerseverenceTeleop extends LinearOpMode {
                     break;
                 }
             }
-            //choker
-            robot.choker.setPower(gamepad2.left_stick_y);
+            //choker add control (x) after merge w/ raymond
 
             // arm
             robot.arm.setPower(gamepad2.right_stick_y * .6);
@@ -341,10 +340,10 @@ PerseverenceTeleop extends LinearOpMode {
             //Roller
             if (gamepad2.right_trigger > .5) {
                 robot.rollers.setPower(1.0);
-                robot.peewee.setPower(-1.0);
+                robot.peewee.setPower(1.0);
             } else if (gamepad2.left_trigger > .5) {
                 robot.rollers.setPower(-1.0);
-                robot.peewee.setPower(1.0);
+                robot.peewee.setPower(-1.0);
             } else {
                 robot.rollers.setPower(0.0);
                 robot.peewee.setPower(0.0);
@@ -371,23 +370,47 @@ PerseverenceTeleop extends LinearOpMode {
             //power shots without camera
             if (gamepad2.y) {
                 //shoot ring
+                robot.flyWheel.setPower(.75);
+
+//                autoPilot(0, 1.57, 10, .8, 10);
+//                robot.leftDrive.setPower(0);
+//                robot.rightDrive.setPower(0);
+//                robot.leftBackDrive.setPower(0);
+//                robot.rightBackDrive.setPower(0);
+                waitMilis(1000);
+
                 robot.escapeServo.setPosition(openEscape);
                 robot.finalEscapeServo.setPosition(openEscape);
                 waitMilis(400);
                 robot.escapeServo.setPosition(closedEscape);
                 robot.finalEscapeServo.setPosition(closedEscape);
-                autoPilot(0,1.57, 19.25, .8, 10);
+
+                autoPilot(0, 1.57, 12, .8, 10);
+                robot.leftDrive.setPower(0);
+                robot.rightDrive.setPower(0);
+                robot.leftBackDrive.setPower(0);
+                robot.rightBackDrive.setPower(0);
+
                 robot.escapeServo.setPosition(openEscape);
                 robot.finalEscapeServo.setPosition(openEscape);
                 waitMilis(400);
                 robot.escapeServo.setPosition(closedEscape);
                 robot.finalEscapeServo.setPosition(closedEscape);
-                autoPilot(0,1.57, 19.25, .8, 10);
+
+                autoPilot(0, 1.57, 12, .8, 10);
+                robot.leftDrive.setPower(0);
+                robot.rightDrive.setPower(0);
+                robot.leftBackDrive.setPower(0);
+                robot.rightBackDrive.setPower(0);
+
                 robot.escapeServo.setPosition(openEscape);
                 robot.finalEscapeServo.setPosition(openEscape);
                 waitMilis(400);
                 robot.escapeServo.setPosition(closedEscape);
                 robot.finalEscapeServo.setPosition(closedEscape);
+
+                robot.escapeServo.setPosition(openEscape);
+                robot.flyWheel.setPower(1);
             }
 
             // slow mode
