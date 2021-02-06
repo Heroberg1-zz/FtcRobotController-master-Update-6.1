@@ -33,23 +33,14 @@ package org.firstinspires.ftc.teamcode;
 //import com.arcrobotics.ftclib.geometry.Rotation2d;
 //import com.arcrobotics.ftclib.geometry.Transform2d;
 
-import android.content.Context;
-import android.hardware.biometrics.BiometricPrompt;
-
-import androidx.renderscript.RenderScript;
-
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Hardware;
 
-import org.firstinspires.ftc.robotcontroller.external.samples.BasicOpMode_Iterative;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -61,7 +52,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import org.firstinspires.ftc.teamcode.HardwarePerseverence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,20 +63,6 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 //import com.spartronics4915.lib.T265Camera;
 
-
-/**
- * This OpMode uses the common Pushbot hardware class to define the devices on the robot.
- * All device access is managed through the HardwarePushbot class.
- * The code is structured as a LinearOpMode
- * <p>
- * This particular OpMode executes a POV Game style Teleop for a PushBot
- * In this mode the left stick moves the robot FWD and back, the Right stick turns left and right.
- * It raises and lowers the claw using the Gampad Y and A buttons respectively.
- * It also opens and closes the claws slowly using the left and right Bumper buttons.
- * <p>
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
 
 @TeleOp(name = "Tele", group = "Pushbot")
 
@@ -359,10 +335,9 @@ PerseverenceTeleop extends LinearOpMode {
             // Send telemetry message to signify robot running;
             double currentHeading = -imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             double headingRadians = -((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416);
+
             telemetry.addData("Heading", headingRadians);
             // Provide feedback as to where the robot is located (if we know).
-            telemetry.addData("Distance", robot.frontDistance.getDistance(DistanceUnit.INCH));
-            telemetry.addData("Angle", currentHeading);
             autoAim();
             telemetry.update();
         }
@@ -383,28 +358,29 @@ PerseverenceTeleop extends LinearOpMode {
             // express the rotation of the robot in degrees.
             Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
             telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-            float x1 = 2;
-            float y1 = -15;
+            double x1 = 30;
+            double y1 = 30;
 
-            double x2 = -72 + robot.frontDistance.getDistance(DistanceUnit.INCH);
-            float y2 = translation.get(1);
+            double x2 = translation.get(0) / mmPerInch;//-72 + (robot.frontDistance.getDistance(DistanceUnit.INCH) + 8.1);
+            double y2 = translation.get(1) / mmPerInch;
 
             double dx;
             double dy;
             double translationDistance;
             double translationAngle;
 
-            if (gamepad1.a) {
-                while (robot.frontDistance.getDistance(DistanceUnit.INCH) > 322 /** add timeout **/) {
-                    robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    robot.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    robot.leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    robot.leftDrive.setPower(1.0);
-                    robot.rightDrive.setPower(1.0);
-                    robot.leftBackDrive.setPower(1.0);
-                    robot.rightBackDrive.setPower(1.0);
-                }
+            if (gamepad1.b) {
+                robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                robot.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                robot.leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                runtime.reset();
+//                while (robot.frontDistance.getDistance(DistanceUnit.INCH) > 322 && runtime.seconds() < 5) {
+//                    robot.leftDrive.setPower(1.0);
+//                    robot.rightDrive.setPower(1.0);
+//                    robot.leftBackDrive.setPower(1.0);
+//                    robot.rightBackDrive.setPower(1.0);
+//                }
                 robot.leftDrive.setPower(0);
                 robot.rightDrive.setPower(0);
                 robot.leftBackDrive.setPower(0);
@@ -413,18 +389,49 @@ PerseverenceTeleop extends LinearOpMode {
                 dy = y1 - y2;
                 translationDistance = (dx * dx) + (dy * dy);
                 translationDistance = Math.sqrt(translationDistance);
+                telemetry.addData("x1", x1);
+                telemetry.addData("x2", x2);
+                telemetry.addData("y1", y1);
+                telemetry.addData("y2", y2);
                 telemetry.addData("dx", dx);
                 telemetry.addData("dy", dy);
                 telemetry.addData("Distance", translationDistance);
-                translationAngle = Math.atan(dx / dy);
-                telemetry.addData("Angle", translationAngle);
-
+                translationAngle = Math.atan(dy / dx);
+                translationAngle = (180 * (Math.PI/180)) - (translationAngle);
+                telemetry.addData("Angle", translationAngle * (180/Math.PI));
+                autoPilot(translationAngle, 1.57, translationDistance * 2.54, .25, 10);
             }
 
 
         } else {
             telemetry.addData("Visible Target", "none");
         }
+    }
+    public void imuReset() {
+        while (robot.rightBottomColor.alpha() < 1000 && robot.leftBottomColor.alpha() < 1000) {
+            robot.leftDrive.setPower(0.25);
+            robot.rightDrive.setPower(0.25);
+            robot.leftBackDrive.setPower(0.25);
+            robot.rightBackDrive.setPower(0.25);
+        }
+        robot.leftDrive.setPower(0);
+        robot.rightDrive.setPower(0);
+        robot.leftBackDrive.setPower(0);
+        robot.rightBackDrive.setPower(0);
+        while (robot.rightBottomColor.alpha() < 1000) {
+            robot.rightDrive.setPower(0.25);
+            robot.rightBackDrive.setPower(0.25);
+        }
+        robot.leftDrive.setPower(0);
+        robot.rightDrive.setPower(0);
+        robot.leftBackDrive.setPower(0);
+        robot.rightBackDrive.setPower(0);
+        while (robot.leftBottomColor.alpha() < 1000) {
+            robot.rightDrive.setPower(0.25);
+            robot.rightBackDrive.setPower(0.25);
+        }
+        imu.startAccelerationIntegration(null, null, 10);
+        return;
     }
     public double subtractAngle(double angleA,
                                 double angleB) {

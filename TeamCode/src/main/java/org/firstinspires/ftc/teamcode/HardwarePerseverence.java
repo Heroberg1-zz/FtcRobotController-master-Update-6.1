@@ -29,9 +29,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -93,7 +90,8 @@ public class HardwarePerseverence {
      * I2C
      */
     public DistanceSensor escapeSensor = null;
-    public ColorSensor bottomColor = null;
+    public ColorSensor rightBottomColor = null;
+    public ColorSensor leftBottomColor = null;
     public DistanceSensor frontDistance = null;
     /**
      * USB
@@ -136,7 +134,8 @@ public class HardwarePerseverence {
       //  leftMarker = hwMap.get(AnalogInput.class, "leftMarker");
      //   rightMarker = hwMap.get(AnalogInput.class, "rightMarker");
         /** I2C */
-        bottomColor = hwMap.get(ColorSensor.class, "bottomColor");
+        rightBottomColor = hwMap.get(ColorSensor.class, "bottomColor");
+        leftBottomColor = hwMap.get(ColorSensor.class, "leftBottomColor");
         escapeSensor = hwMap.get(DistanceSensor.class,"escapeSensor");
         frontDistance = hwMap.get(DistanceSensor.class, "frontDistance");
         /** USB */
