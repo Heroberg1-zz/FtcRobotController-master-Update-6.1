@@ -81,16 +81,7 @@ PerseverenceTeleop extends LinearOpMode {
     static final double DRIVE_SPEED = 1.0;
     static final double TURN_SPEED = 0.8;
     static final double DIST_PER_REV = (10 * Math.PI) / COUNTS_PER_MOTOR_REV;
-
-    public double subtractAngle(double angleA,
-                                double angleB) {
-        double result;
-        result = angleA - angleB;
-        if (result > 180) {
-            result = result - 360;
-        }
-        return result;
-    }
+    
 
     public void waitMilis(double timeOutMs) {
 
