@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.Hardware;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.BasicOpMode_Iterative;
 import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion;
@@ -63,10 +64,9 @@ public class Camera {
     private LinearOpMode opMode;
     private HardwareMap hardwareMap;
 
-    Camera(HardwarePerseverence robot, BNO055IMU imu, LinearOpMode opMode, HardwareMap hardwareMap) {
+    Camera(HardwarePerseverence robot, BNO055IMU imu, HardwareMap hardwareMap) {
         this.robot = robot;
         this.imu = imu;
-        this.opMode = opMode;
         this.hardwareMap = hardwareMap;
     }
 
@@ -111,7 +111,7 @@ public class Camera {
     public void vuphoriaNav(Telemetry telemetry) {
         telemetry.addData("Test", "Start");
         telemetry.update();
-        webcamName = hardwareMap.get(WebcamName.class, "Webcam");
+        webcamName = (WebcamName) robot.webcam;
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters vuphoriaParameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
         vuphoriaParameters.vuforiaLicenseKey = VUFORIA_KEY;

@@ -37,6 +37,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -63,20 +64,6 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 //import com.spartronics4915.lib.T265Camera;
 
 
-/**
- * This OpMode uses the common Pushbot hardware class to define the devices on the robot.
- * All device access is managed through the HardwarePushbot class.
- * The code is structured as a LinearOpMode
- * <p>
- * This particular OpMode executes a POV Game style Teleop for a PushBot
- * In this mode the left stick moves the robot FWD and back, the Right stick turns left and right.
- * It raises and lowers the claw using the Gampad Y and A buttons respectively.
- * It also opens and closes the claws slowly using the left and right Bumper buttons.
- * <p>
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
-
 @TeleOp(name = "Tele", group = "Pushbot")
 
 public class
@@ -84,6 +71,8 @@ PerseverenceTeleop extends LinearOpMode {
     HardwarePerseverence robot = new HardwarePerseverence();
     private BNO055IMU imu;
     private final ElapsedTime runtime = new ElapsedTime();
+    private HardwareMap hardware = null;
+
 
     static final double COUNTS_PER_MOTOR_REV = 537.6;
     static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
@@ -209,7 +198,7 @@ PerseverenceTeleop extends LinearOpMode {
 
         // The tower goal targets are located a quarter field length from the ends of the back perimeter wall.
         blueTowerGoalTarget.setLocation(OpenGLMatrix
-                .translation(halfField, quadField, mmTargetHeight)
+                .translation(halfField, quadField + 2, mmTargetHeight) /** Adjusted for our feild **/
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
         redTowerGoalTarget.setLocation(OpenGLMatrix
                 .translation(halfField, -quadField, mmTargetHeight)
@@ -232,8 +221,8 @@ PerseverenceTeleop extends LinearOpMode {
 
         // Next, translate the camera lens to where it is on the robot.
         // In this example, it is centered (left to right), but forward of the middle of the robot, and above ground level.
-        final float CAMERA_FORWARD_DISPLACEMENT = 8.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot-center
-        final float CAMERA_VERTICAL_DISPLACEMENT = 10.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
+        final float CAMERA_FORWARD_DISPLACEMENT = 8.5f * mmPerInch;   // eg: Camera is 4 Inches in front of robot-center
+        final float CAMERA_VERTICAL_DISPLACEMENT = 13.5f * mmPerInch;   // eg: Camera is 8 Inches above ground
         final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the robot's center line
 
         OpenGLMatrix robotFromCamera = OpenGLMatrix
@@ -434,29 +423,115 @@ PerseverenceTeleop extends LinearOpMode {
             robot.rightBackDrive.setPower(v4 * driveSpeed);
 
             // Send telemetry message to signify robot running;
-            double currentHeading = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            double currentHeading = -imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             double headingRadians = -((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416);
-            telemetry.addLine("IMU");
+
+            telemetry.addData("Heading", headingRadians);
             // Provide feedback as to where the robot is located (if we know).
-            if (targetVisible) {
-                // express position (translation) of robot in inches.
-                VectorF translation = lastLocation.getTranslation();
-                telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
-                        translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
-
-                // express the rotation of the robot in degrees.
-                Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
-                telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-            } else {
-                telemetry.addData("Visible Target", "none");
-            }
-            telemetry.addData("Centimeters", robot.escapeSensor.getDistance(DistanceUnit.CM));
+            autoAim();
             telemetry.update();
-
         }
         targetsUltimateGoal.deactivate();
     }
 
+    public void autoAim() {
+//
+
+//
+//        telemetry.addData("x", x);
+        if (targetVisible) {
+            // express position (translation) of robot in inches.
+            VectorF translation = lastLocation.getTranslation();
+            telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+                    translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
+
+            // express the rotation of the robot in degrees.
+            Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+            telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+            double x1 = 30;
+            double y1 = 30;
+
+            double x2 = translation.get(0) / mmPerInch;//-72 + (robot.frontDistance.getDistance(DistanceUnit.INCH) + 8.1);
+            double y2 = translation.get(1) / mmPerInch;
+
+            double dx;
+            double dy;
+            double translationDistance;
+            double translationAngle;
+
+            if (gamepad1.b) {
+                robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                robot.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                robot.leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                runtime.reset();
+//                while (robot.frontDistance.getDistance(DistanceUnit.INCH) > 322 && runtime.seconds() < 5) {
+//                    robot.leftDrive.setPower(1.0);
+//                    robot.rightDrive.setPower(1.0);
+//                    robot.leftBackDrive.setPower(1.0);
+//                    robot.rightBackDrive.setPower(1.0);
+//                }
+                robot.leftDrive.setPower(0);
+                robot.rightDrive.setPower(0);
+                robot.leftBackDrive.setPower(0);
+                robot.rightBackDrive.setPower(0);
+                dx = x1 - x2;
+                dy = y1 - y2;
+                translationDistance = (dx * dx) + (dy * dy);
+                translationDistance = Math.sqrt(translationDistance);
+                telemetry.addData("x1", x1);
+                telemetry.addData("x2", x2);
+                telemetry.addData("y1", y1);
+                telemetry.addData("y2", y2);
+                telemetry.addData("dx", dx);
+                telemetry.addData("dy", dy);
+                telemetry.addData("Distance", translationDistance);
+                translationAngle = Math.atan(dy / dx);
+                translationAngle = (180 * (Math.PI/180)) - (translationAngle);
+                telemetry.addData("Angle", translationAngle * (180/Math.PI));
+                autoPilot(translationAngle, 1.57, translationDistance * 2.54, .25, 10);
+            }
+
+
+        } else {
+            telemetry.addData("Visible Target", "none");
+        }
+    }
+    public void imuReset() {
+        while (robot.rightBottomColor.alpha() < 1000 && robot.leftBottomColor.alpha() < 1000) {
+            robot.leftDrive.setPower(0.25);
+            robot.rightDrive.setPower(0.25);
+            robot.leftBackDrive.setPower(0.25);
+            robot.rightBackDrive.setPower(0.25);
+        }
+        robot.leftDrive.setPower(0);
+        robot.rightDrive.setPower(0);
+        robot.leftBackDrive.setPower(0);
+        robot.rightBackDrive.setPower(0);
+        while (robot.rightBottomColor.alpha() < 1000) {
+            robot.rightDrive.setPower(0.25);
+            robot.rightBackDrive.setPower(0.25);
+        }
+        robot.leftDrive.setPower(0);
+        robot.rightDrive.setPower(0);
+        robot.leftBackDrive.setPower(0);
+        robot.rightBackDrive.setPower(0);
+        while (robot.leftBottomColor.alpha() < 1000) {
+            robot.rightDrive.setPower(0.25);
+            robot.rightBackDrive.setPower(0.25);
+        }
+        imu.startAccelerationIntegration(null, null, 10);
+        return;
+    }
+    public double subtractAngle(double angleA,
+                                double angleB) {
+        double result;
+        result = angleA - angleB;
+        if (result > 180) {
+            result = result - 360;
+        }
+        return result;
+    }
     public void autoPilot(double heading,
                           double pose,
                           double distance,
@@ -537,6 +612,7 @@ PerseverenceTeleop extends LinearOpMode {
             robot.rightBackDrive.setPower(v4);
         }
     }
+
 }
 
 

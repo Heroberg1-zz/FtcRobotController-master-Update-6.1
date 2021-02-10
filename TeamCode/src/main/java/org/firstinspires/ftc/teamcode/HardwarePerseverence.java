@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -89,8 +90,10 @@ public class HardwarePerseverence {
     /**
      * I2C
      */
-    public Rev2mDistanceSensor escapeSensor = null;
-    public ColorSensor bottomColor = null;
+    public DistanceSensor escapeSensor = null;
+    public ColorSensor rightBottomColor = null;
+    public ColorSensor leftBottomColor = null;
+    public DistanceSensor frontDistance = null;
     /**
      * USB
      */
@@ -131,8 +134,10 @@ public class HardwarePerseverence {
         //  leftMarker = hwMap.get(AnalogInput.class, "leftMarker");
         //   rightMarker = hwMap.get(AnalogInput.class, "rightMarker");
         /** I2C */
-        bottomColor = hwMap.get(ColorSensor.class, "bottomColor");
-        escapeSensor = hwMap.get(Rev2mDistanceSensor.class, "escapeSensor");
+        rightBottomColor = hwMap.get(ColorSensor.class, "bottomColor");
+        leftBottomColor = hwMap.get(ColorSensor.class, "leftBottomColor");
+        escapeSensor = hwMap.get(DistanceSensor.class,"escapeSensor");
+        frontDistance = hwMap.get(DistanceSensor.class, "frontDistance");
         /** USB */
         webcam = hwMap.get(WebcamName.class, "webcam");
         leftDrive.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
