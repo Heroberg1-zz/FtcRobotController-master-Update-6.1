@@ -144,7 +144,9 @@ PerseverenceTeleop extends LinearOpMode {
         double robotAngle;
         double driveSpeed;
         int escape = 0;
+        int choker = 0;
         double oldTime = 0.0;
+        double oldTime1 = 0.0;
         boolean longEscape = false;
         double openEscape = 0;
         double closedEscape = .2;
@@ -270,10 +272,29 @@ PerseverenceTeleop extends LinearOpMode {
                     break;
                 }
             }
-            //choker add control (x) after merge w/ raymond
-
             // arm
             robot.arm.setPower(gamepad2.right_stick_y * .6);
+
+            //choker
+            switch (choker) {
+                case 0:
+                    choker++;
+                    break;
+                case 1:
+                    if (gamepad2.x) {
+                        robot.choker.setPower(1.0);
+                        choker++;
+                    }
+                    break;
+                case 2:
+                    if (robot.chokerSwitch.getVoltage() > 3) {
+                        robot.choker.setPower(-.001);
+                        choker++;
+                    } else if (runtime.milliseconds() > oldTime1 + 100) {
+                        robot.choker.setPower(-1);
+                    }
+                    break;
+            }
 
             //escape
             switch (escape) {
@@ -331,7 +352,6 @@ PerseverenceTeleop extends LinearOpMode {
 
             //aim
             //robot.aimbot.setPosition(.6);
-
 
             //looking glass/shooter off
             if (gamepad2.dpad_up) {
@@ -426,9 +446,6 @@ PerseverenceTeleop extends LinearOpMode {
     }
 
     public void autoAim() {
-//
-
-//
 //        telemetry.addData("x", x);
         if (targetVisible) {
             // express position (translation) of robot in inches.
@@ -488,6 +505,7 @@ PerseverenceTeleop extends LinearOpMode {
             telemetry.addData("Visible Target", "none");
         }
     }
+
     public void imuReset() {
         while (robot.rightBottomColor.alpha() < 1000 && robot.leftBottomColor.alpha() < 1000) {
             robot.leftDrive.setPower(0.25);
@@ -514,6 +532,7 @@ PerseverenceTeleop extends LinearOpMode {
         imu.startAccelerationIntegration(null, null, 10);
         return;
     }
+
     public double subtractAngle(double angleA,
                                 double angleB) {
         double result;
@@ -523,6 +542,7 @@ PerseverenceTeleop extends LinearOpMode {
         }
         return result;
     }
+
     public void autoPilot(double heading,
                           double pose,
                           double distance,
