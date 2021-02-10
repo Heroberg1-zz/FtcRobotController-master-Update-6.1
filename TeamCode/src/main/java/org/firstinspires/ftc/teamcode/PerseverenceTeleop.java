@@ -81,7 +81,7 @@ PerseverenceTeleop extends LinearOpMode {
     static final double DRIVE_SPEED = 1.0;
     static final double TURN_SPEED = 0.8;
     static final double DIST_PER_REV = (10 * Math.PI) / COUNTS_PER_MOTOR_REV;
-    
+
 
     public void waitMilis(double timeOutMs) {
 
@@ -439,10 +439,10 @@ PerseverenceTeleop extends LinearOpMode {
             // express the rotation of the robot in degrees.
             Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
             telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-            double x1 = 30;
-            double y1 = 30;
+            double x1 = 3;
+            double y1 = -14;
 
-            double x2 = translation.get(0) / mmPerInch;//-72 + (robot.frontDistance.getDistance(DistanceUnit.INCH) + 8.1);
+            double x2 = -72 + (robot.frontDistance.getDistance(DistanceUnit.INCH) + 8.1);
             double y2 = translation.get(1) / mmPerInch;
 
             double dx;
@@ -480,7 +480,7 @@ PerseverenceTeleop extends LinearOpMode {
                 translationAngle = Math.atan(dy / dx);
                 translationAngle = (180 * (Math.PI/180)) - (translationAngle);
                 telemetry.addData("Angle", translationAngle * (180/Math.PI));
-                autoPilot(translationAngle, 1.57, translationDistance * 2.54, .25, 10);
+                //autoPilot(translationAngle, 1.57, translationDistance * 2.54, .25, 10);
             }
 
 
