@@ -315,8 +315,21 @@ public class RedAuto extends LinearOpMode {
                 robot.choker.setPower(1);
                 waitMilis(300);
                 robot.choker.setPower(0);
-                autoPilot(3.14,1.57,200,1,6);
+                autoPilot(3.14,1.57,185,1,6);
+                autoPilot(0,1.57,2,.4,1);
+                while (robot.rightBottomColor.alpha() < 1000) {
+                    robot.leftDrive.setPower(-0.35);
+                    robot.rightDrive.setPower(-0.35);
+                    robot.leftBackDrive.setPower(-0.35);
+                    robot.rightBackDrive.setPower(-0.35);
+                }
+                robot.leftDrive.setPower(0);
+                robot.rightDrive.setPower(0);
+                robot.leftBackDrive.setPower(0);
+                robot.rightBackDrive.setPower(0);
             }
+            autoPilot(4.71,1.57,33,.4,5);
+            autoPilot(3.14,1.57,5,.45,1);
             telemetry.update();
             stop();
 
