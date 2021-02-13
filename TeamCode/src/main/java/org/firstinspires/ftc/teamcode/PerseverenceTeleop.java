@@ -287,7 +287,7 @@ PerseverenceTeleop extends LinearOpMode {
                     }
                     break;
                 case 2:
-                    if (robot.chokerSwitch.getVoltage() > 3) {
+                    if (robot.chokerSwitch.getVoltage() < 3) {
                         robot.choker.setPower(-.001);
                         choker++;
                     } else if (runtime.milliseconds() > oldTime1 + 100) {
@@ -377,7 +377,7 @@ PerseverenceTeleop extends LinearOpMode {
 //                robot.rightDrive.setPower(0);
 //                robot.leftBackDrive.setPower(0);
 //                robot.rightBackDrive.setPower(0);
-                waitMilis(1000);
+                waitMilis(1500);
 
                 robot.escapeServo.setPosition(openEscape);
                 robot.finalEscapeServo.setPosition(openEscape);
@@ -385,11 +385,12 @@ PerseverenceTeleop extends LinearOpMode {
                 robot.escapeServo.setPosition(closedEscape);
                 robot.finalEscapeServo.setPosition(closedEscape);
 
-                autoPilot(0, 1.57, 12, .8, 10);
+                autoPilot(0, 1.57, 19, 1, 10);
                 robot.leftDrive.setPower(0);
                 robot.rightDrive.setPower(0);
                 robot.leftBackDrive.setPower(0);
                 robot.rightBackDrive.setPower(0);
+                waitMilis(500);
 
                 robot.escapeServo.setPosition(openEscape);
                 robot.finalEscapeServo.setPosition(openEscape);
@@ -397,11 +398,12 @@ PerseverenceTeleop extends LinearOpMode {
                 robot.escapeServo.setPosition(closedEscape);
                 robot.finalEscapeServo.setPosition(closedEscape);
 
-                autoPilot(0, 1.57, 12, .8, 10);
+                autoPilot(0, 1.57, 19, 1, 10);
                 robot.leftDrive.setPower(0);
                 robot.rightDrive.setPower(0);
                 robot.leftBackDrive.setPower(0);
                 robot.rightBackDrive.setPower(0);
+                waitMilis(500);
 
                 robot.escapeServo.setPosition(openEscape);
                 robot.finalEscapeServo.setPosition(openEscape);
