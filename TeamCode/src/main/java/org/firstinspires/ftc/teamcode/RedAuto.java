@@ -7,11 +7,18 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.HardwarePerseverence;
+
+import java.util.List;
 
 @Autonomous(name = "Auto", group = "Pushbot")
 public class RedAuto extends LinearOpMode {
@@ -29,6 +36,13 @@ public class RedAuto extends LinearOpMode {
     static final double DRIVE_SPEED = 1.0;
     static final double TURN_SPEED = 0.8;
     static final double DIST_PER_REV = (10 * Math.PI) / COUNTS_PER_MOTOR_REV;
+    private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
+    private static final String LABEL_FIRST_ELEMENT = "Quad";
+    private static final String LABEL_SECOND_ELEMENT = "Single";
+    private static final String VUFORIA_KEY =
+            "Afz+Zrv/////AAABmSYDPqm+9Eeal4Qr3dPA93OKxmHLJOElO/flBfFW0x0sVdkLfIA4pm1EPqtd8fnTd0N0fKtVH0+hBxmglqS/Xn7S7Ahjpfd6sHeA4db+jCCf+lKvrt5LCuHp14NsBsjs4QB90u4hp/qGKQOyP4PVZ1KLC5gDu0VCP5vu4+M6505T4vAmojax18+tNGWInbVpUPqJuQPHregDhjsv7/6P/RLQMMK0zWW4zHCyiatZZX3NzGrrHvMh3uPE3mN/E0ucG/guL6Pp16PpLevoUXoz6IqqmWXcZUMo/IkRKdppCspWJbRfSngK5B2+MNzbM3tedVzFGaey/HApKBMxuqhO5uY+nWSud0GLd/SpJ9EmMRdl";
+    private VuforiaLocalizer vuforia;
+    private TFObjectDetector tfod;
 
     public double subtractAngle(double angleA,
                                 double angleB) {
@@ -168,6 +182,36 @@ public class RedAuto extends LinearOpMode {
         return;
     }
 
+    /**
+     * Initialize the Vuforia localization engine.
+     */
+    private void initVuforia() {
+        /*
+         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+         */
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraName = hardwareMap.get(WebcamName.class, "webcam");
+
+        //  Instantiate the Vuforia engine
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+        // Loading trackables is not necessary for the TensorFlow Object Detection engine.
+    }
+
+    /**
+     * Initialize the TensorFlow Object Detection engine.
+     */
+    private void initTfod() {
+        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfodParameters.minResultConfidence = 0.8f;
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
+    }
+
     public void runOpMode() {
         robot.init(hardwareMap);
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -178,6 +222,19 @@ public class RedAuto extends LinearOpMode {
         parameters.loggingTag = "IMU";
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
+        initVuforia();
+        initTfod();
+        if (tfod != null) {
+            tfod.activate();
+
+            // The TensorFlow software will scale the input images from the camera to a lower resolution.
+            // This can result in lower detection accuracy at longer distances (> 55cm or 22").
+            // If your target is at distance greater than 50 cm (20") you can adjust the magnification value
+            // to artificially zoom in to the center of image.  For best results, the "aspectRatio" argument
+            // should be set to the value of the images used to create the TensorFlow Object Detection model
+            // (typically 16/9).
+            tfod.setZoom(2.25, 5.0 / 3.0);
+        }
         //reset the encoders to 0
         robot.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -193,42 +250,79 @@ public class RedAuto extends LinearOpMode {
         robot.leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         robot.rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         waitMilis(50);
+        waitMilis(1000);
+        boolean quad = false;
+        boolean single = false;
+        boolean none = false;
+        if (tfod != null) {
+            // getUpdatedRecognitions() will return null if no new information is available since
+            // the last time that call was made.
+            List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+            if (updatedRecognitions != null) {
+                //telemetry.addData("# Object Detected", updatedRecognitions.size());
+                // step through the list of recognitions and display boundary info.
+                int i = 0;
+                for (Recognition recognition : updatedRecognitions) {
+                    if (recognition.getLabel() == "Quad") { // Quad
+                        quad = true;
+                    } else if (recognition.getLabel() == "Single") { // Single
+                        single = true;
+                    } else { /** None **/
+                        none = true;
+                    }
+                }
+            }
+        }
+        telemetry.addData("Robot", "Waiting for Start");
+        if (quad) {
+            telemetry.addData("Stack", "Quad");
+        } else if (single) {
+            telemetry.addData("Stack", "Single");
+        } else {
+            telemetry.addData("Stack", "None");
+        }
+        telemetry.update();
         waitForStart();
         while (opModeIsActive()) {
-            // go to line
-            autoPilot(1.57, 1.57, 190, .4, 10);
-//            while (((double) robot.bottomColor.red() < 40) && ((double) robot.bottomColor.blue() < 40) && ((double) robot.bottomColor.green() < 40)) {
-//                whileAutoPilot(1.57, 1.57, .4);
-//            }
-//            runtime.reset();
-//            autoPilot(1.1, 1.57, 117.5, 0.6 - runtime.seconds() / 7, 10);
-//            //drop rings
-//            waitMilis(200);
-//            autoPilot(4.71, 1.57, 100, .6, 10);
-//            autoPilot(3.14, 1.57, 105, .7, 10);
-//            waitMilis(10);
-//            //grab wobble
-//            autoPilot(4.71, 4.71, 88, .7, 10);
-////            runtime.reset();
-////            while (((double) robot.bottomColor.red() < 28) && (runtime.seconds() < 4)) {
-////                whileAutoPilot(0, 4.71, .2);
-////            }
-////            autoPilot(3.14, 4.71, 37, .7, 10);
-//            autoPilot(4.71, 4.71, 4, .7, 10);
-//            waitMilis(200);
-//            waitMilis(1000);
-//            autoPilot(1.57, 0, 100, .7, 10);
-//            while (((double) robot.bottomColor.red() < 40) && ((double) robot.bottomColor.blue() < 40) && ((double) robot.bottomColor.green() < 40)) {
-//                whileAutoPilot(1.57, 0, .4);
-//            }
-//            autoPilot(0, 0, 85, 0.5, 10);
-//            waitMilis(600);
-//            autoPilot(3.14, 0, 75, 0.7, 10);
-////            while (((double) robot.bottomColor.red() < 40) & ((double) robot.bottomColor.blue() < 40) & ((double) robot.bottomColor.green() < 40)) {
-////                whileAutoPilot(4.71, 1.57, .75);
-////            }
-
+            //Universal Start
+            autoPilot(0, 1.57, 30, .7, 6);
+            autoPilot(1.57,1.57,150,.75,5);
+            runtime.reset();
+            while (robot.rightBottomColor.alpha() < 1000) {
+                robot.leftDrive.setPower(0.35);
+                robot.rightDrive.setPower(0.35);
+                robot.leftBackDrive.setPower(0.35);
+                robot.rightBackDrive.setPower(0.35);
+            }
+            robot.leftDrive.setPower(0);
+            robot.rightDrive.setPower(0);
+            robot.leftBackDrive.setPower(0);
+            robot.rightBackDrive.setPower(0);
+            if (quad) {
+                telemetry.addData("Working?", "Quad");
+                telemetry.update();
+            } else if (single) {
+                telemetry.addData("Working?", "Single");
+                telemetry.update();
+            } else {
+                telemetry.addData("Working?", "None");
+                telemetry.update();
+                autoPilot(3.14,3.14,50,.5,4);
+                robot.arm.setPower(1);
+                waitMilis(1000);
+                robot.arm.setPower(0);
+                waitMilis(200);
+                robot.choker.setPower(1);
+                waitMilis(300);
+                robot.choker.setPower(0);
+                autoPilot(3.14,1.57,200,1,6);
+            }
+            telemetry.update();
             stop();
+
+        }
+        if (tfod != null) {
+            tfod.shutdown();
         }
     }
 }

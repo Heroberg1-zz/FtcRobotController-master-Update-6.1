@@ -432,12 +432,13 @@ PerseverenceTeleop extends LinearOpMode {
             robot.rightDrive.setPower(v2 * driveSpeed);
             robot.leftBackDrive.setPower(v3 * driveSpeed);
             robot.rightBackDrive.setPower(v4 * driveSpeed);
-
             // Send telemetry message to signify robot running;
             double currentHeading = -imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             double headingRadians = -((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416);
 
             telemetry.addData("Heading", headingRadians);
+            telemetry.addData("RightColor", robot.rightBottomColor.alpha());
+            telemetry.addData("LeftColor", robot.leftBottomColor.alpha());
             // Provide feedback as to where the robot is located (if we know).
             autoAim();
             telemetry.update();
@@ -459,8 +460,9 @@ PerseverenceTeleop extends LinearOpMode {
             double x1 = 3;
             double y1 = -14;
 
-            double x2 = -72 + (robot.frontDistance.getDistance(DistanceUnit.INCH) + 8.1);
-            double y2 = translation.get(1) / mmPerInch;
+            //double x2 = -72 + (robot.frontDistance.getDistance(DistanceUnit.INCH) + 8.1);
+            double x2 = translation.get(0);
+            double y2 = translation.get(1);
 
             double dx;
             double dy;
@@ -493,10 +495,14 @@ PerseverenceTeleop extends LinearOpMode {
                 telemetry.addData("y2", y2);
                 telemetry.addData("dx", dx);
                 telemetry.addData("dy", dy);
-                telemetry.addData("Distance", translationDistance);
                 translationAngle = Math.atan(dy / dx);
-                translationAngle = (180 * (Math.PI/180)) - (translationAngle);
-                telemetry.addData("Angle", translationAngle * (180/Math.PI));
+                translationAngle = (translationAngle * (Math.PI / 180));
+                translationAngle = (4.71 - translationAngle);
+                //  translationAngle = ((180 - (translationAngle)) * (Math.PI / 180));
+                telemetry.addData("Distance", translationDistance);
+                telemetry.addData("Angle", translationAngle * (180 / Math.PI));
+                telemetry.addData("Angle Before", Math.atan(dy / dx));
+                telemetry.addData("Angle Raidians", translationAngle);
                 //autoPilot(translationAngle, 1.57, translationDistance * 2.54, .25, 10);
             }
 

@@ -70,11 +70,14 @@ public class PerseverenceMotorTest extends LinearOpMode {
 //    }
         waitForStart();
        while (opModeIsActive())  {
-           telemetry.addData("Centimeters",robot.escapeSensor.getDistance(DistanceUnit.CM));
-           telemetry.addData("Heading First Angle", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
-           telemetry.addData("Heading Second Angle", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).secondAngle);
-           telemetry.addData("Heading Third Angle", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle);
-           telemetry.update();
+//           telemetry.addData("Centimeters",robot.escapeSensor.getDistance(DistanceUnit.CM));
+//           telemetry.addData("Heading First Angle", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+//           telemetry.addData("Heading Second Angle", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).secondAngle);
+//           telemetry.addData("Heading Third Angle", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle);
+//           telemetry.update();
+//           while (robot.rightBottomColor.alpha() < 1000 || robot.leftBottomColor.alpha() < 1000 && runtime.seconds() < 6) {
+//               whileAutoPilot(1.57, 1.57, .4);
+//           }
         }
     }
 }
