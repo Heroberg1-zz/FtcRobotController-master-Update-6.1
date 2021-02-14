@@ -275,27 +275,14 @@ PerseverenceTeleop extends LinearOpMode {
             // arm
             robot.arm.setPower(gamepad2.right_stick_y * .6);
 
-            //choker
-            switch (choker) {
-                case 0:
-                    choker++;
-                    break;
-                case 1:
-                    if (gamepad2.x) {
-                        robot.choker.setPower(1.0);
-                        choker++;
-                    }
-                    break;
-                case 2:
-                    if (robot.chokerSwitch.getVoltage() < 3) {
-                        robot.choker.setPower(-.001);
-                        choker++;
-                    } else if (runtime.milliseconds() > oldTime1 + 100) {
-                        robot.choker.setPower(-1);
-                    }
-                    break;
-            }
+            // choker
+            if (gamepad2.x) {
+                robot.choker.setPower(1.0);
+            } else if (robot.chokerSwitch.getVoltage() < 3) {
+                robot.choker.setPower(-1.0);
+            } else robot.choker.setPower(0);
 
+            telemetry.addData("voltage", robot.chokerSwitch.getVoltage());
             //escape
             switch (escape) {
                 case 0:
@@ -370,22 +357,19 @@ PerseverenceTeleop extends LinearOpMode {
             //power shots without camera
             if (gamepad2.y) {
                 //shoot ring
-                robot.flyWheel.setPower(.75);
-
-//                autoPilot(0, 1.57, 10, .8, 10);
-//                robot.leftDrive.setPower(0);
-//                robot.rightDrive.setPower(0);
-//                robot.leftBackDrive.setPower(0);
-//                robot.rightBackDrive.setPower(0);
+                robot.flyWheel.setPower(.7);
                 waitMilis(1500);
+
+                autoPilot(0, 1.57, 6, 1, 2);
 
                 robot.escapeServo.setPosition(openEscape);
                 robot.finalEscapeServo.setPosition(openEscape);
                 waitMilis(400);
                 robot.escapeServo.setPosition(closedEscape);
                 robot.finalEscapeServo.setPosition(closedEscape);
+                robot.flyWheel.setPower(.75);
 
-                autoPilot(0, 1.57, 19, 1, 10);
+                autoPilot(0, 1.57, 17, 1, 10);
                 robot.leftDrive.setPower(0);
                 robot.rightDrive.setPower(0);
                 robot.leftBackDrive.setPower(0);
@@ -398,7 +382,7 @@ PerseverenceTeleop extends LinearOpMode {
                 robot.escapeServo.setPosition(closedEscape);
                 robot.finalEscapeServo.setPosition(closedEscape);
 
-                autoPilot(0, 1.57, 19, 1, 10);
+                autoPilot(0, 1.57, 17, 1, 10);
                 robot.leftDrive.setPower(0);
                 robot.rightDrive.setPower(0);
                 robot.leftBackDrive.setPower(0);
@@ -471,7 +455,7 @@ PerseverenceTeleop extends LinearOpMode {
             double translationDistance;
             double translationAngle;
 
-            if (gamepad1.b) {
+            if (false) {
                 robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 robot.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

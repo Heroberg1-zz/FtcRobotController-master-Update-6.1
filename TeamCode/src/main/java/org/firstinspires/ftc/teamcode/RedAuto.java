@@ -43,6 +43,8 @@ public class RedAuto extends LinearOpMode {
             "Afz+Zrv/////AAABmSYDPqm+9Eeal4Qr3dPA93OKxmHLJOElO/flBfFW0x0sVdkLfIA4pm1EPqtd8fnTd0N0fKtVH0+hBxmglqS/Xn7S7Ahjpfd6sHeA4db+jCCf+lKvrt5LCuHp14NsBsjs4QB90u4hp/qGKQOyP4PVZ1KLC5gDu0VCP5vu4+M6505T4vAmojax18+tNGWInbVpUPqJuQPHregDhjsv7/6P/RLQMMK0zWW4zHCyiatZZX3NzGrrHvMh3uPE3mN/E0ucG/guL6Pp16PpLevoUXoz6IqqmWXcZUMo/IkRKdppCspWJbRfSngK5B2+MNzbM3tedVzFGaey/HApKBMxuqhO5uY+nWSud0GLd/SpJ9EmMRdl";
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;
+    double openEscape = 0;
+    double closedEscape = .2;
 
     public double subtractAngle(double angleA,
                                 double angleB) {
@@ -173,6 +175,40 @@ public class RedAuto extends LinearOpMode {
         robot.rightBackDrive.setPower(v4);
         return;
     }
+    public void gyroTurn(double heading,
+                         double timeoutS) {
+        double currentHeading;
+        double power;
+//        double p = 0;
+//        double i = 0;
+//        double d = 0;
+//        double pK = .05;
+//        double iK = .5;
+//        double dK = .05;
+//        double oldHeading = 0;
+        runtime.reset();
+        while (runtime.seconds() < timeoutS) {
+            currentHeading = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+//            p = (currentHeading - heading) * pK;
+//            i = p * iK + i;
+//            d = (oldHeading - currentHeading) * dK;
+//            power = p+i+d;
+            power = (currentHeading - heading * (180/Math.PI)) / 50;
+            if (power < 0) {
+                power = -Math.max(0.1, Math.abs(power));
+            } else {
+                power = Math.max(0.1, Math.abs(power));
+            }
+            if (Math.abs(currentHeading - heading) < 2.0) {
+                return;
+            }
+
+            robot.leftDrive.setPower(-power);
+            robot.leftBackDrive.setPower(-power);
+            robot.rightDrive.setPower(power);
+            robot.rightBackDrive.setPower(power);
+        }
+    }
 
     public void brake() {
         robot.leftDrive.setPower(0);
@@ -180,6 +216,47 @@ public class RedAuto extends LinearOpMode {
         robot.rightDrive.setPower(0);
         robot.rightBackDrive.setPower(0);
         return;
+    }
+
+    private void autoPowerShot() {
+        robot.flyWheel.setPower(.75);
+        waitMilis(200);
+        autoPilot(0,1.57,6,1,2);
+
+        robot.escapeServo.setPosition(openEscape);
+        robot.finalEscapeServo.setPosition(openEscape);
+        waitMilis(450);
+        robot.escapeServo.setPosition(closedEscape);
+        robot.finalEscapeServo.setPosition(closedEscape);
+
+        autoPilot(0, 1.57, 17, 1, 10);
+        robot.leftDrive.setPower(0);
+        robot.rightDrive.setPower(0);
+        robot.leftBackDrive.setPower(0);
+        robot.rightBackDrive.setPower(0);
+        waitMilis(500);
+
+        robot.escapeServo.setPosition(openEscape);
+        robot.finalEscapeServo.setPosition(openEscape);
+        waitMilis(450);
+        robot.escapeServo.setPosition(closedEscape);
+        robot.finalEscapeServo.setPosition(closedEscape);
+
+        autoPilot(0, 1.57, 17, 1, 10);
+        robot.leftDrive.setPower(0);
+        robot.rightDrive.setPower(0);
+        robot.leftBackDrive.setPower(0);
+        robot.rightBackDrive.setPower(0);
+        waitMilis(500);
+
+        robot.escapeServo.setPosition(openEscape);
+        robot.finalEscapeServo.setPosition(openEscape);
+        waitMilis(450);
+        robot.escapeServo.setPosition(closedEscape);
+        robot.finalEscapeServo.setPosition(closedEscape);
+
+        robot.escapeServo.setPosition(openEscape);
+        robot.flyWheel.setPower(0);
     }
 
     /**
@@ -286,9 +363,9 @@ public class RedAuto extends LinearOpMode {
         while (opModeIsActive()) {
             //Universal Start
             autoPilot(0, 1.57, 30, .7, 6);
-            autoPilot(1.57,1.57,150,.75,5);
+            autoPilot(1.57,1.57,140,.75,5);
             runtime.reset();
-            while (robot.rightBottomColor.alpha() < 1000) {
+            while (robot.rightBottomColor.alpha() < 1000 && runtime.seconds() < 3) {
                 robot.leftDrive.setPower(0.35);
                 robot.rightDrive.setPower(0.35);
                 robot.leftBackDrive.setPower(0.35);
@@ -301,12 +378,88 @@ public class RedAuto extends LinearOpMode {
             if (quad) {
                 telemetry.addData("Working?", "Quad");
                 telemetry.update();
+                robot.flyWheel.setPower(.75);
+                autoPilot(1.57,4.71,15,.7,6);
+                robot.arm.setPower(1);
+                waitMilis(1000);
+                robot.arm.setPower(0);
+                waitMilis(200);
+                robot.choker.setPower(1);
+                autoPilot(4.71,4.71,10,.6,4);
+                robot.choker.setPower(0);
+                autoPilot(3.14,1.57,220,1,5);
+                autoPilot(0,1.57,5,.4,1);
+                autoPilot(4.71,1.57,40,.6,3);
+                runtime.reset();
+                while (robot.rightBottomColor.alpha() < 1000 && runtime.seconds() < 3) {
+                    robot.leftDrive.setPower(-0.35);
+                    robot.rightDrive.setPower(-0.35);
+                    robot.leftBackDrive.setPower(-0.35);
+                    robot.rightBackDrive.setPower(-0.35);
+                }
+                robot.leftDrive.setPower(0);
+                robot.rightDrive.setPower(0);
+                robot.leftBackDrive.setPower(0);
+                robot.rightBackDrive.setPower(0);
+                autoPilot(4.71,1.57,37,.4,5);
+                autoPilot(3.14,1.57,5,.4,1);
+                robot.lookingGlass.setPower(1);
+                autoPowerShot();
+                robot.arm.setPower(-.8);
+                autoPilot(4.71,1.57,160,.85,4);
+                robot.arm.setPower(0);
+                autoPilot(0,1.57,77,.7,4);
+                autoPilot(1.9,1.85,150,.65,6);
+                autoPilot(2.093,1.047,30,.5,3);
+                autoPilot(.785,.785,150,.75,5);
+                autoPilot(4.71,1.57,75,1,1);
+                robot.leftDrive.setPower(0);
+                robot.rightDrive.setPower(0);
+                robot.leftBackDrive.setPower(0);
+                robot.rightBackDrive.setPower(0);
+                autoPilot(0,1.57,10,1, 10);
             } else if (single) {
                 telemetry.addData("Working?", "Single");
                 telemetry.update();
+                //gyroTurn(0,5);
+                autoPilot(4.71,1.57,7,.75,5);
+                robot.flyWheel.setPower(.75);
+                autoPilot(3.14,4.71,60,.7,4);
+                robot.arm.setPower(1);
+                waitMilis(1000);
+                robot.arm.setPower(0);
+                waitMilis(200);
+                robot.choker.setPower(1);
+                waitMilis(150);
+                robot.choker.setPower(0);
+                autoPilot(3.14,1.57,150,.9,5);
+                autoPilot(0,1.57,5,.4,1);
+                autoPilot(1.57,1.57,10,.5,2);
+                runtime.reset();
+                while (robot.rightBottomColor.alpha() < 1000 && runtime.seconds() < 3) {
+                    robot.leftDrive.setPower(-0.35);
+                    robot.rightDrive.setPower(-0.35);
+                    robot.leftBackDrive.setPower(-0.35);
+                    robot.rightBackDrive.setPower(-0.35);
+                }
+                robot.leftDrive.setPower(0);
+                robot.rightDrive.setPower(0);
+                robot.leftBackDrive.setPower(0);
+                robot.rightBackDrive.setPower(0);
+                autoPilot(4.71,1.57,37,.4,5);
+                autoPilot(3.14,1.57,5,.4,1);
+                robot.lookingGlass.setPower(1);
+                autoPowerShot();
+                robot.arm.setPower(-.8);
+                autoPilot(4.71,1.57,160,.85,4);
+                robot.arm.setPower(0);
+                autoPilot(0,1.57,65,.7,4);
+                autoPilot(1.5,1.5,210,.6,5);
+                autoPilot(4.71,1.57,15,.5,3);
             } else {
                 telemetry.addData("Working?", "None");
                 telemetry.update();
+                robot.flyWheel.setPower(.75);
                 autoPilot(3.14,3.14,50,.5,4);
                 robot.arm.setPower(1);
                 waitMilis(1000);
@@ -327,10 +480,30 @@ public class RedAuto extends LinearOpMode {
                 robot.rightDrive.setPower(0);
                 robot.leftBackDrive.setPower(0);
                 robot.rightBackDrive.setPower(0);
+                autoPilot(4.71,1.57,37,.4,5);
+                autoPilot(3.14,1.57,5,.45,1);
+                robot.lookingGlass.setPower(1);
+                autoPowerShot();
+                robot.arm.setPower(-.8);
+                autoPilot(4.71,1.57,160,.85,4);
+                robot.arm.setPower(0);
+                autoPilot(0,1.57,60,.7,4);
+                autoPilot(1.1,1.1,173,.75,8);
+                autoPilot(4.71,1.57,20,.7,5);
+                autoPilot(3.14,1.57,35,.7,5);
+                autoPilot(1.57,1.57,40,.65,5);
+                while (robot.rightBottomColor.alpha() < 1000 && runtime.seconds() < 3) {
+                    robot.leftDrive.setPower(0.3);
+                    robot.rightDrive.setPower(0.3);
+                    robot.leftBackDrive.setPower(0.3);
+                    robot.rightBackDrive.setPower(0.3);
+                }
+                robot.leftDrive.setPower(0);
+                robot.rightDrive.setPower(0);
+                robot.leftBackDrive.setPower(0);
+                robot.rightBackDrive.setPower(0);
             }
-            autoPilot(4.71,1.57,33,.4,5);
-            autoPilot(3.14,1.57,5,.45,1);
-            telemetry.update();
+
             stop();
 
         }
