@@ -169,7 +169,7 @@ public class HardwarePerseverence {
         rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        flyWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
         // Define and initialize ALL installed servos.

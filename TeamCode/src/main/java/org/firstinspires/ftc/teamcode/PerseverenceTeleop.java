@@ -74,7 +74,7 @@ PerseverenceTeleop extends LinearOpMode {
     private HardwareMap hardware = null;
 
 
-    static final double COUNTS_PER_MOTOR_REV = 537.6;
+    static final double COUNTS_PER_MOTOR_REV = 383.6;
     static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_CENTIMETERS = 10.16;     // For figuring circumference
     static final double COUNTS_PER_CENTIMETER = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_CENTIMETERS * 3.1415);
@@ -150,6 +150,7 @@ PerseverenceTeleop extends LinearOpMode {
         boolean longEscape = false;
         double openEscape = 0;
         double closedEscape = .2;
+        boolean flywheelOn = false;
 
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
@@ -348,10 +349,15 @@ PerseverenceTeleop extends LinearOpMode {
             } else if (gamepad2.dpad_right) {
                 robot.lookingGlass.setPower(0);
                 robot.flyWheel.setPower(0);
+                flywheelOn = false;
             }
             //shooter on
             if (gamepad2.dpad_left) {
-                robot.flyWheel.setPower(1);
+                //robot.flyWheel.setPower(1);
+                flywheelOn = true;
+            }
+            if (flywheelOn) {
+                setRPM(robot.flyWheel, 28, 2000, 0.6);
             }
 
             //power shots without camera
@@ -427,9 +433,69 @@ PerseverenceTeleop extends LinearOpMode {
             telemetry.addData("LeftColor", robot.leftBottomColor.alpha());
             // Provide feedback as to where the robot is located (if we know).
             autoAim();
+            telemetry.addData("RPM", getRPM(robot.flyWheel,28));
             telemetry.update();
         }
         targetsUltimateGoal.deactivate();
+    }
+    double currTime = runtime.seconds();
+    double time;
+    double oldTime = 0;
+    int loop = 0;
+    int oldMotorPos = 0;
+    int rpm = 0;
+    public double getRPM(DcMotor motor,
+                         double encoderTicksPerRev) {
+        switch (loop) {
+            case 0:
+                oldMotorPos = motor.getCurrentPosition();
+                oldTime = runtime.seconds();
+                loop++;
+                break;
+            case 1:
+                currTime = runtime.seconds();
+                if (currTime - oldTime > 1) {
+                    time = ((currTime - oldTime));
+                    rpm = (int) ((((motor.getCurrentPosition() - oldMotorPos) / encoderTicksPerRev) / time) * 60);
+                    loop = 0;
+                }
+                break;
+        }
+        return rpm;
+    }
+
+    public void setRPM(DcMotor motor,
+                       double encoderTicksPerRev,
+                       int setRPM,
+                       double initPower) {
+        switch (loop) {
+            case 0:
+                motor.setPower(initPower);
+                loop++;
+                break;
+            case 1:
+                oldMotorPos = motor.getCurrentPosition();
+                oldTime = runtime.seconds();
+                loop++;
+                break;
+            case 2:
+                currTime = runtime.seconds();
+                if (currTime - oldTime > 1) {
+                    time = ((currTime - oldTime));
+                    rpm = (int) ((((motor.getCurrentPosition() - oldMotorPos) / encoderTicksPerRev) / time) * 60);
+                    loop++;
+                }
+                break;
+            case 3:
+                if (rpm > setRPM +- 10) {
+                    motor.setPower(motor.getPower() - 0.05);
+                } else if (rpm < setRPM +- 10) {
+                    motor.setPower(motor.getPower() + 0.05);
+                }
+                loop = 1;
+                break;
+        }
+
     }
 
     public void autoAim() {

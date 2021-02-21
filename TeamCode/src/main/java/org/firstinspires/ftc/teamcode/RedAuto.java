@@ -29,7 +29,7 @@ public class RedAuto extends LinearOpMode {
     private BNO055IMU imu;
     Orientation angles;
     Camera camera = new Camera(robot, imu, hardwareMap);
-    static final double COUNTS_PER_MOTOR_REV = 537.6;
+    static final double COUNTS_PER_MOTOR_REV = 383.6;
     static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_CENTIMETERS = 10.16;     // For figuring circumference
     static final double COUNTS_PER_CENTIMETER = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_CENTIMETERS * 3.1415);
