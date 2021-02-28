@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -331,45 +332,43 @@ public class RedAuto extends LinearOpMode {
         boolean quad = false;
         boolean single = false;
         boolean none = false;
-        if (tfod != null) {
-            // getUpdatedRecognitions() will return null if no new information is available since
-            // the last time that call was made.
-            List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-            if (updatedRecognitions != null) {
-                //telemetry.addData("# Object Detected", updatedRecognitions.size());
-                // step through the list of recognitions and display boundary info.
-                int i = 0;
-                for (Recognition recognition : updatedRecognitions) {
-                    if (recognition.getLabel() == "Quad") { // Quad
-                        quad = true;
-                    } else if (recognition.getLabel() == "Single") { // Single
-                        single = true;
-                    } else { /** None **/
-                        none = true;
+        while (!opModeIsActive() && !isStarted()) {
+            if (tfod != null) {
+                // getUpdatedRecognitions() will return null if no new information is available since
+                // the last time that call was made.
+                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                if (updatedRecognitions != null) {
+                    //telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    // step through the list of recognitions and display boundary info.
+                    int i = 0;
+                    for (Recognition recognition : updatedRecognitions) {
+                        if (recognition.getLabel() == "Quad") { // Quad
+                            quad = true;
+                        } else if (recognition.getLabel() == "Single") { // Single
+                            single = true;
+                        } else { /** None **/
+                            none = true;
+                        }
                     }
                 }
             }
+            telemetry.addData("Robot", "Waiting for Start");
+            if (quad) {
+                telemetry.addData("Stack", "Quad");
+            } else if (single) {
+                telemetry.addData("Stack", "Single");
+            } else {
+                telemetry.addData("Stack", "None");
+            }
+            telemetry.update();
         }
-        telemetry.addData("Robot", "Waiting for Start");
-        if (quad) {
-            telemetry.addData("Stack", "Quad");
-        } else if (single) {
-            telemetry.addData("Stack", "Single");
-        } else {
-            telemetry.addData("Stack", "None");
-        }
-        telemetry.update();
-        waitForStart();
         while (opModeIsActive()) {
             //Universal Start
             autoPilot(0, 1.57, 30, .7, 6);
-            autoPilot(1.57,1.57,140,.75,5);
+            autoPilot(1.57,1.57,135,.75,5);
             runtime.reset();
-            while (robot.rightBottomColor.alpha() < 1000 && runtime.seconds() < 3) {
-                robot.leftDrive.setPower(0.35);
-                robot.rightDrive.setPower(0.35);
-                robot.leftBackDrive.setPower(0.35);
-                robot.rightBackDrive.setPower(0.35);
+            while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 4) {
+                whileAutoPilot(1.57,1.57,.25);
             }
             robot.leftDrive.setPower(0);
             robot.rightDrive.setPower(0);
@@ -384,9 +383,9 @@ public class RedAuto extends LinearOpMode {
                 waitMilis(1000);
                 robot.arm.setPower(0);
                 waitMilis(200);
-                robot.choker.setPower(1);
+//                robot.choker.setPower(1);
                 autoPilot(4.71,4.71,10,.6,4);
-                robot.choker.setPower(0);
+//                robot.choker.setPower(0);
                 autoPilot(3.14,1.57,220,1,5);
                 autoPilot(0,1.57,5,.4,1);
                 autoPilot(4.71,1.57,40,.6,3);
@@ -425,37 +424,31 @@ public class RedAuto extends LinearOpMode {
                 autoPilot(4.71,1.57,7,.75,5);
                 robot.flyWheel.setPower(.75);
                 autoPilot(3.14,4.71,60,.7,4);
-                robot.arm.setPower(1);
-                waitMilis(1000);
-                robot.arm.setPower(0);
-                waitMilis(200);
-                robot.choker.setPower(1);
-                waitMilis(150);
-                robot.choker.setPower(0);
-                autoPilot(3.14,1.57,150,.9,5);
-                autoPilot(0,1.57,5,.4,1);
-                autoPilot(1.57,1.57,10,.5,2);
-                runtime.reset();
-                while (robot.rightBottomColor.alpha() < 1000 && runtime.seconds() < 3) {
-                    robot.leftDrive.setPower(-0.35);
-                    robot.rightDrive.setPower(-0.35);
-                    robot.leftBackDrive.setPower(-0.35);
-                    robot.rightBackDrive.setPower(-0.35);
-                }
-                robot.leftDrive.setPower(0);
-                robot.rightDrive.setPower(0);
-                robot.leftBackDrive.setPower(0);
-                robot.rightBackDrive.setPower(0);
-                autoPilot(4.71,1.57,37,.4,5);
-                autoPilot(3.14,1.57,5,.4,1);
-                robot.lookingGlass.setPower(1);
-                autoPowerShot();
-                robot.arm.setPower(-.8);
-                autoPilot(4.71,1.57,160,.85,4);
-                robot.arm.setPower(0);
-                autoPilot(0,1.57,65,.7,4);
-                autoPilot(1.5,1.5,210,.6,5);
-                autoPilot(4.71,1.57,15,.5,3);
+                //robot.arm.setPower(1);
+             //   waitMilis(1000);
+                //robot.arm.setPower(0);
+               // waitMilis(200);
+//                robot.choker.setPower(1);
+               // waitMilis(150);
+//                robot.choker.setPower(0);
+
+                autoPilot(3.14,3.14,100,.5,4);
+
+
+//                robot.leftDrive.setPower(0);
+//                robot.rightDrive.setPower(0);
+//                robot.leftBackDrive.setPower(0);
+//                robot.rightBackDrive.setPower(0);
+//                autoPilot(4.71,1.57,37,.4,5);
+//                autoPilot(3.14,1.57,5,.4,1);
+//                robot.lookingGlass.setPower(1);
+//                autoPowerShot();
+//                //robot.arm.setPower(-.8);
+//                autoPilot(4.71,1.57,160,.85,4);
+//                //robot.arm.setPower(0);
+//                autoPilot(0,1.57,65,.7,4);
+//                autoPilot(1.5,1.5,210,.6,5);
+//                autoPilot(4.71,1.57,15,.5,3);
             } else {
                 telemetry.addData("Working?", "None");
                 telemetry.update();
@@ -465,9 +458,9 @@ public class RedAuto extends LinearOpMode {
                 waitMilis(1000);
                 robot.arm.setPower(0);
                 waitMilis(200);
-                robot.choker.setPower(1);
+//                robot.choker.setPower(1);
                 waitMilis(300);
-                robot.choker.setPower(0);
+//                robot.choker.setPower(0);
                 autoPilot(3.14,1.57,185,1,6);
                 autoPilot(0,1.57,2,.4,1);
                 while (robot.rightBottomColor.alpha() < 1000) {

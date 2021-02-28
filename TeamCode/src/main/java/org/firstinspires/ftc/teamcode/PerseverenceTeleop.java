@@ -151,6 +151,7 @@ PerseverenceTeleop extends LinearOpMode {
         double openEscape = 0;
         double closedEscape = .2;
         boolean flywheelOn = false;
+        boolean chokerClosed = false;
 
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
@@ -274,14 +275,36 @@ PerseverenceTeleop extends LinearOpMode {
                 }
             }
             // arm
-            robot.arm.setPower(gamepad2.right_stick_y * .6);
+            robot.arm.setPower(gamepad2.left_stick_y * .5);
 
             // choker
             if (gamepad2.x) {
-                robot.choker.setPower(1.0);
-            } else if (robot.chokerSwitch.getVoltage() < 3) {
-                robot.choker.setPower(-1.0);
-            } else robot.choker.setPower(0);
+                robot.choker.setPosition(.4125);
+            } else
+                robot.choker.setPosition(0);
+//            switch (choker) {
+//                case 1:
+//                    chokerClosed = false;
+//                case 2:
+//                    chokerClosed = true;
+//                case 3:
+//                    choker = 1;
+//            }
+//            if (gamepad2.x) {
+//                choker++;
+//            }
+//            if (chokerClosed) {
+//                robot.choker.setPosition(0.4125);
+//            } else {
+//                robot.choker.setPosition(0);
+//            }
+            telemetry.addData("choker pos", robot.choker.getPosition());
+
+//            if (gamepad2.x) {
+//                robot.choker.setPosition(1.0);
+//            } else if (robot.chokerSwitch.getVoltage() < 3) {
+//                robot.choker.setPosition(0);
+//            } else
 
             telemetry.addData("voltage", robot.chokerSwitch.getVoltage());
             //escape
@@ -357,52 +380,14 @@ PerseverenceTeleop extends LinearOpMode {
                 flywheelOn = true;
             }
             if (flywheelOn) {
-                setRPM(robot.flyWheel, 28, 2000, 0.6);
+                robot.flyWheel.setPower(1);
+                //setRPM(robot.flyWheel, 28, 2000, 0.6);
             }
 
             //power shots without camera
             if (gamepad2.y) {
                 //shoot ring
-                robot.flyWheel.setPower(.7);
-                waitMilis(1500);
-
-                autoPilot(0, 1.57, 6, 1, 2);
-
-                robot.escapeServo.setPosition(openEscape);
-                robot.finalEscapeServo.setPosition(openEscape);
-                waitMilis(400);
-                robot.escapeServo.setPosition(closedEscape);
-                robot.finalEscapeServo.setPosition(closedEscape);
-                robot.flyWheel.setPower(.75);
-
-                autoPilot(0, 1.57, 17, 1, 10);
-                robot.leftDrive.setPower(0);
-                robot.rightDrive.setPower(0);
-                robot.leftBackDrive.setPower(0);
-                robot.rightBackDrive.setPower(0);
-                waitMilis(500);
-
-                robot.escapeServo.setPosition(openEscape);
-                robot.finalEscapeServo.setPosition(openEscape);
-                waitMilis(400);
-                robot.escapeServo.setPosition(closedEscape);
-                robot.finalEscapeServo.setPosition(closedEscape);
-
-                autoPilot(0, 1.57, 17, 1, 10);
-                robot.leftDrive.setPower(0);
-                robot.rightDrive.setPower(0);
-                robot.leftBackDrive.setPower(0);
-                robot.rightBackDrive.setPower(0);
-                waitMilis(500);
-
-                robot.escapeServo.setPosition(openEscape);
-                robot.finalEscapeServo.setPosition(openEscape);
-                waitMilis(400);
-                robot.escapeServo.setPosition(closedEscape);
-                robot.finalEscapeServo.setPosition(closedEscape);
-
-                robot.escapeServo.setPosition(openEscape);
-                robot.flyWheel.setPower(1);
+                autoPowerShot(.75, 1);
             }
 
             // slow mode
@@ -433,17 +418,19 @@ PerseverenceTeleop extends LinearOpMode {
             telemetry.addData("LeftColor", robot.leftBottomColor.alpha());
             // Provide feedback as to where the robot is located (if we know).
             autoAim();
-            telemetry.addData("RPM", getRPM(robot.flyWheel,28));
+            telemetry.addData("RPMFly", getRPM(robot.flyWheel, 28));
             telemetry.update();
         }
         targetsUltimateGoal.deactivate();
     }
+
     double currTime = runtime.seconds();
     double time;
     double oldTime = 0;
     int loop = 0;
     int oldMotorPos = 0;
     int rpm = 0;
+
     public double getRPM(DcMotor motor,
                          double encoderTicksPerRev) {
         switch (loop) {
@@ -487,9 +474,9 @@ PerseverenceTeleop extends LinearOpMode {
                 }
                 break;
             case 3:
-                if (rpm > setRPM +- 10) {
+                if (rpm > setRPM /**+- 10**/) {
                     motor.setPower(motor.getPower() - 0.05);
-                } else if (rpm < setRPM +- 10) {
+                } else if (rpm < setRPM /**+- 10**/) {
                     motor.setPower(motor.getPower() + 0.05);
                 }
                 loop = 1;
@@ -562,6 +549,27 @@ PerseverenceTeleop extends LinearOpMode {
         } else {
             telemetry.addData("Visible Target", "none");
         }
+    }
+
+    public void autoPowerShot(double flyWheelPower,
+                              double lookingGlassPower) {
+        double openEscape = 0;
+        double closedEscape = .2;
+        double time;
+        robot.flyWheel.setPower(flyWheelPower);
+        robot.lookingGlass.setPower(lookingGlassPower);
+        waitMilis(1500);
+        robot.escapeServo.setPosition(openEscape);
+        robot.finalEscapeServo.setPosition(openEscape);
+        time = runtime.milliseconds();
+        while (runtime.milliseconds() - time < 2500) {
+            whileAutoPilot(0.0, 1.57, .22);
+        }
+        robot.leftDrive.setPower(0);
+        robot.rightDrive.setPower(0);
+        robot.leftBackDrive.setPower(0);
+        robot.rightBackDrive.setPower(0);
+        robot.finalEscapeServo.setPosition(closedEscape);
     }
 
     public void imuReset() {
@@ -666,7 +674,7 @@ PerseverenceTeleop extends LinearOpMode {
 
             driveAngle = ((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416) + heading;
 //            driveAngle = 0.5*Math.PI;
-//            adjPower = 0;
+            adjPower = 0;
 
             double robotAngle = driveAngle - Math.PI / 4;
             final double v1 = power * Math.cos(robotAngle) - adjPower;
@@ -679,6 +687,74 @@ PerseverenceTeleop extends LinearOpMode {
             robot.rightDrive.setPower(v2);
             robot.leftBackDrive.setPower(v3);
             robot.rightBackDrive.setPower(v4);
+        }
+    }
+
+    public void whileAutoPilot(double heading,
+                               double pose,
+                               double power) {
+        double currentHeading;
+        double adjPower;
+        double driveAngle;
+        double headingRadians;
+        double poseDegrees;
+
+        currentHeading = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        poseDegrees = ((pose - 3.1416 / 2) % (2 * 3.1416)) * (360 / (2 * 3.1416));
+        if (poseDegrees > 180) {
+            poseDegrees -= 360;
+        }
+        if (poseDegrees < -180) {
+            poseDegrees += 360;
+        }
+        adjPower = subtractAngle(poseDegrees, currentHeading) / 120;
+        driveAngle = ((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416) + heading;
+//            driveAngle = 0.5*Math.PI;
+//            adjPower = 0;
+        double robotAngle = driveAngle - Math.PI / 4;
+        final double v1 = power * Math.cos(robotAngle) - adjPower;
+        final double v2 = power * Math.sin(robotAngle) + adjPower;
+        final double v3 = power * Math.sin(robotAngle) - adjPower;
+        final double v4 = power * Math.cos(robotAngle) + adjPower;
+        robot.leftDrive.setPower(v1);
+        robot.rightDrive.setPower(v2);
+        robot.leftBackDrive.setPower(v3);
+        robot.rightBackDrive.setPower(v4);
+        return;
+    }
+
+    public void gyroTurn(double heading,
+                         double timeoutS) {
+        double currentHeading;
+        double power;
+//        double p = 0;
+//        double i = 0;
+//        double d = 0;
+//        double pK = .05;
+//        double iK = .5;
+//        double dK = .05;
+//        double oldHeading = 0;
+        runtime.reset();
+        while (runtime.seconds() < timeoutS) {
+            currentHeading = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+//            p = (currentHeading - heading) * pK;
+//            i = p * iK + i;
+//            d = (oldHeading - currentHeading) * dK;
+//            power = p+i+d;
+            power = (currentHeading - heading * (180 / Math.PI)) / 50;
+            if (power < 0) {
+                power = -Math.max(0.1, Math.abs(power));
+            } else {
+                power = Math.max(0.1, Math.abs(power));
+            }
+            if (Math.abs(currentHeading - heading) < 2.0) {
+                return;
+            }
+
+            robot.leftDrive.setPower(-power);
+            robot.leftBackDrive.setPower(-power);
+            robot.rightDrive.setPower(power);
+            robot.rightBackDrive.setPower(power);
         }
     }
 

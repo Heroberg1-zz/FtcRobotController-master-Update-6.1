@@ -76,7 +76,7 @@ public class HardwarePerseverence {
      * Servos
      */
     public CRServo arm = null;
-    public CRServo choker = null;
+    public Servo choker = null;
     public Servo aimbot = null;
     public Servo escapeServo = null;
     public Servo finalEscapeServo = null;
@@ -124,7 +124,7 @@ public class HardwarePerseverence {
         flyWheel = hwMap.get(DcMotor.class, "flyWheel");
         /** Servos */
         arm = hwMap.get(CRServo.class, "arm");
-        choker = hwMap.get(CRServo.class, "choker");
+        choker = hwMap.get(Servo.class, "choker");
         aimbot = hwMap.get(Servo.class, "aimbot");
         escapeServo = hwMap.get(Servo.class, "escapeServo");
         finalEscapeServo = hwMap.get(Servo.class, "finalEscapeServo");
@@ -140,10 +140,10 @@ public class HardwarePerseverence {
         frontDistance = hwMap.get(DistanceSensor.class, "frontDistance");
         /** USB */
         webcam = hwMap.get(WebcamName.class, "webcam");
-        leftDrive.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-        rightDrive.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
-        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftDrive.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+        rightDrive.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
+        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         rollers.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
@@ -170,6 +170,7 @@ public class HardwarePerseverence {
         leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //choker.scaleRange(.3,.5);
 
 
         // Define and initialize ALL installed servos.
