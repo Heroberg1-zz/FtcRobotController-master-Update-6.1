@@ -152,6 +152,7 @@ PerseverenceTeleop extends LinearOpMode {
         double closedEscape = .2;
         boolean flywheelOn = false;
         boolean chokerClosed = false;
+        boolean flyWheelSlow = false;
 
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
@@ -247,6 +248,9 @@ PerseverenceTeleop extends LinearOpMode {
         robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        robot.flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         // Send telemetry message to signify robot waiting;
         robot.escapeServo.setPosition(openEscape);
         telemetry.addData("Pushbot:", "Hello Driver");    //
@@ -373,21 +377,29 @@ PerseverenceTeleop extends LinearOpMode {
                 robot.lookingGlass.setPower(0);
                 robot.flyWheel.setPower(0);
                 flywheelOn = false;
+                flyWheelSlow = false;
             }
             //shooter on
             if (gamepad2.dpad_left) {
                 //robot.flyWheel.setPower(1);
                 flywheelOn = true;
+                flyWheelSlow = false;
             }
             if (flywheelOn) {
                 robot.flyWheel.setPower(1);
                 //setRPM(robot.flyWheel, 28, 2000, 0.6);
             }
-
+            if (gamepad2.back) {
+                flyWheelSlow = true;
+                flywheelOn = false;
+            }
+            if (flyWheelSlow) {
+                robot.flyWheel.setPower(.75);
+            }
             //power shots without camera
             if (gamepad2.y) {
                 //shoot ring
-                autoPowerShot(.75, 1);
+                autoPowerShot(.775, 1);
             }
 
             // slow mode
@@ -416,6 +428,7 @@ PerseverenceTeleop extends LinearOpMode {
             telemetry.addData("Heading", headingRadians);
             telemetry.addData("RightColor", robot.rightBottomColor.alpha());
             telemetry.addData("LeftColor", robot.leftBottomColor.alpha());
+            telemetry.addData("Distance", robot.frontDistance.getDistance(DistanceUnit.CM));
             // Provide feedback as to where the robot is located (if we know).
             autoAim();
             telemetry.addData("RPMFly", getRPM(robot.flyWheel, 28));
@@ -558,12 +571,13 @@ PerseverenceTeleop extends LinearOpMode {
         double time;
         robot.flyWheel.setPower(flyWheelPower);
         robot.lookingGlass.setPower(lookingGlassPower);
-        waitMilis(1500);
+        waitMilis(500);
+        autoPilot(0.0, 1.57,8,.65,10);
         robot.escapeServo.setPosition(openEscape);
         robot.finalEscapeServo.setPosition(openEscape);
         time = runtime.milliseconds();
         while (runtime.milliseconds() - time < 2500) {
-            whileAutoPilot(0.0, 1.57, .22);
+            whileAutoPilot(0.0, 1.57, .24);
         }
         robot.leftDrive.setPower(0);
         robot.rightDrive.setPower(0);
