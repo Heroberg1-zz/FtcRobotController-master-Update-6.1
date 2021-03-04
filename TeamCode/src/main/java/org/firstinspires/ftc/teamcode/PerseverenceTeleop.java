@@ -243,6 +243,7 @@ PerseverenceTeleop extends LinearOpMode {
         robot.rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.flyWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //run using the encoders
         robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -386,16 +387,17 @@ PerseverenceTeleop extends LinearOpMode {
                 flyWheelSlow = false;
             }
             if (flywheelOn) {
-                robot.flyWheel.setPower(1);
+                setRPM(robot.flyWheel, 28, 5500, 0.7);
+                //robot.flyWheel.setPower(1);
                 //setRPM(robot.flyWheel, 28, 2000, 0.6);
             }
             if (gamepad2.back) {
                 flyWheelSlow = true;
                 flywheelOn = false;
             }
-            if (flyWheelSlow) {
-                robot.flyWheel.setPower(.75);
-            }
+//            if (flyWheelSlow) {
+//                robot.flyWheel.setPower(.75);
+//            }
             //power shots without camera
             if (gamepad2.y) {
                 //shoot ring
@@ -430,7 +432,7 @@ PerseverenceTeleop extends LinearOpMode {
             telemetry.addData("LeftColor", robot.leftBottomColor.alpha());
             telemetry.addData("Distance", robot.frontDistance.getDistance(DistanceUnit.CM));
             // Provide feedback as to where the robot is located (if we know).
-            autoAim();
+            //autoAim();
             telemetry.addData("RPMFly", getRPM(robot.flyWheel, 28));
             telemetry.update();
         }
@@ -439,7 +441,7 @@ PerseverenceTeleop extends LinearOpMode {
 
     double currTime = runtime.seconds();
     double time;
-    double oldTime = 0;
+    double oldTime = runtime.seconds();
     int loop = 0;
     int oldMotorPos = 0;
     int rpm = 0;
@@ -448,29 +450,6 @@ PerseverenceTeleop extends LinearOpMode {
                          double encoderTicksPerRev) {
         switch (loop) {
             case 0:
-                oldMotorPos = motor.getCurrentPosition();
-                oldTime = runtime.seconds();
-                loop++;
-                break;
-            case 1:
-                currTime = runtime.seconds();
-                if (currTime - oldTime > 1) {
-                    time = ((currTime - oldTime));
-                    rpm = (int) ((((motor.getCurrentPosition() - oldMotorPos) / encoderTicksPerRev) / time) * 60);
-                    loop = 0;
-                }
-                break;
-        }
-        return rpm;
-    }
-
-    public void setRPM(DcMotor motor,
-                       double encoderTicksPerRev,
-                       int setRPM,
-                       double initPower) {
-        switch (loop) {
-            case 0:
-                motor.setPower(initPower);
                 loop++;
                 break;
             case 1:
@@ -483,19 +462,73 @@ PerseverenceTeleop extends LinearOpMode {
                 if (currTime - oldTime > 1) {
                     time = ((currTime - oldTime));
                     rpm = (int) ((((motor.getCurrentPosition() - oldMotorPos) / encoderTicksPerRev) / time) * 60);
-                    loop++;
+                    loop = 0;
+                }
+                break;
+        }
+        return rpm;
+    }
+
+    double currTimeSet = runtime.seconds();
+    double timeSet;
+    double oldTimeSet = runtime.seconds();
+    int loopSet = 0;
+    int oldMotorPosSet = 0;
+    int rpmSet = 0;
+
+    public void setRPM(DcMotor motor,
+                       double encoderTicksPerRev,
+                       int setRPM,
+                       double initPower) {
+        switch (loopSet) {
+            case 0:
+                motor.setPower(initPower);
+                loopSet++;
+                break;
+            case 1:
+                oldMotorPosSet = motor.getCurrentPosition();
+                oldTimeSet = runtime.seconds();
+                loopSet++;
+                break;
+            case 2:
+                currTimeSet = runtime.seconds();
+                timeSet = currTimeSet - oldTimeSet;
+                if (timeSet > 2) {
+                    loopSet++;
                 }
                 break;
             case 3:
-                if (rpm > setRPM /**+- 10**/) {
-                    motor.setPower(motor.getPower() - 0.05);
-                } else if (rpm < setRPM /**+- 10**/) {
-                    motor.setPower(motor.getPower() + 0.05);
+                rpmSet = Math.abs(rpm - setRPM);
+                double dampener;
+                if (rpmSet > 150) {
+                    dampener = 1;
+                } else if (rpmSet > 120) {
+                    dampener = .8;
+                } else if (rpmSet > 100) {
+                    dampener = .6;
+                } else if (rpmSet > 80) {
+                    dampener = .4;
+                } else if (rpmSet > 50) {
+                    dampener = .2;
+                } else if (rpmSet > 30) {
+                    dampener = .1;
+                } else {
+                    dampener = .05;
                 }
-                loop = 1;
+                if (rpm > setRPM) {
+                    motor.setPower(motor.getPower() - 0.05 * dampener);
+                } else if (rpm < setRPM) {
+                    motor.setPower(motor.getPower() + 0.05 * dampener);
+                }
+                loopSet = 1;
                 break;
         }
-
+        telemetry.addData("oldMotorPos", oldMotorPosSet);
+        telemetry.addData("oldTime", oldTimeSet);
+        telemetry.addData("currTime", currTimeSet);
+        telemetry.addData("time", timeSet);
+        telemetry.addData("rpm", rpm);
+        telemetry.addData("motor powwer", motor.getPower());
     }
 
     public void autoAim() {
@@ -572,7 +605,7 @@ PerseverenceTeleop extends LinearOpMode {
         robot.flyWheel.setPower(flyWheelPower);
         robot.lookingGlass.setPower(lookingGlassPower);
         waitMilis(500);
-        autoPilot(0.0, 1.57,8,.65,10);
+        autoPilot(0.0, 1.57, 8, .65, 10);
         robot.escapeServo.setPosition(openEscape);
         robot.finalEscapeServo.setPosition(openEscape);
         time = runtime.milliseconds();
