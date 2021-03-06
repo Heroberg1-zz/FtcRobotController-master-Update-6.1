@@ -287,30 +287,8 @@ PerseverenceTeleop extends LinearOpMode {
                 robot.choker.setPosition(.4125);
             } else
                 robot.choker.setPosition(0);
-//            switch (choker) {
-//                case 1:
-//                    chokerClosed = false;
-//                case 2:
-//                    chokerClosed = true;
-//                case 3:
-//                    choker = 1;
-//            }
-//            if (gamepad2.x) {
-//                choker++;
-//            }
-//            if (chokerClosed) {
-//                robot.choker.setPosition(0.4125);
-//            } else {
-//                robot.choker.setPosition(0);
-//            }
+
             telemetry.addData("choker pos", robot.choker.getPosition());
-
-//            if (gamepad2.x) {
-//                robot.choker.setPosition(1.0);
-//            } else if (robot.chokerSwitch.getVoltage() < 3) {
-//                robot.choker.setPosition(0);
-//            } else
-
             telemetry.addData("voltage", robot.chokerSwitch.getVoltage());
             //escape
             switch (escape) {
