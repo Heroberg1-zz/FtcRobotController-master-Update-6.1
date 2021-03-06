@@ -1,9 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -12,12 +11,10 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.HardwarePerseverence;
 
 import java.util.List;
 
@@ -346,7 +343,7 @@ public class RedAuto extends LinearOpMode {
         while (opModeIsActive()) {
             //Universal Start
             autoPilot(0, 1.57, 30, .7, 6);
-            autoPilot(1.57, 1.57, 155, .75, 5);
+            autoPilot(1.57, 1.57, 150, .75, 5);
             runtime.reset();
             while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 4) {
                 whileAutoPilot(1.57, 1.57, .25);
@@ -445,54 +442,40 @@ public class RedAuto extends LinearOpMode {
                 robot.escapeServo.setPosition(openEscape);
                 robot.finalEscapeServo.setPosition(openEscape);
                 waitMilis(750);
-                autoPilot(1.57,1.57,10,1,1);
+                autoPilot(1.57, 1.57, 10, 1, 1);
 
             } else {
                 telemetry.addData("Working?", "None");
                 telemetry.update();
                 robot.flyWheel.setPower(.75);
-                autoPilot(3.14, 3.14, 50, .5, 4);
+                autoPilot(2.5, 3.14, 20, .75, 5);
                 robot.arm.setPower(1);
                 waitMilis(1000);
                 robot.arm.setPower(0);
-                waitMilis(200);
-//                robot.choker.setPower(1);
-                waitMilis(300);
-//                robot.choker.setPower(0);
-                autoPilot(3.14, 1.57, 185, 1, 6);
+                waitMilis(400);
+                robot.choker.setPosition(0);
+                waitMilis(500);
+                autoPilot(3.14, 1.57, 175, .6, 4);
                 autoPilot(0, 1.57, 2, .4, 1);
-                while (robot.rightBottomColor.alpha() < 1000) {
-                    robot.leftDrive.setPower(-0.35);
-                    robot.rightDrive.setPower(-0.35);
-                    robot.leftBackDrive.setPower(-0.35);
-                    robot.rightBackDrive.setPower(-0.35);
+                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 3) {
+                    whileAutoPilot(4.71, 1.57, .3);
                 }
-                robot.leftDrive.setPower(0);
-                robot.rightDrive.setPower(0);
-                robot.leftBackDrive.setPower(0);
-                robot.rightBackDrive.setPower(0);
+                brake();
+                robot.arm.setPower(-.9);
                 autoPilot(4.71, 1.57, 37, .4, 5);
                 autoPilot(3.14, 1.57, 5, .45, 1);
-                robot.lookingGlass.setPower(1);
-                //autoPowerShot();
-                robot.arm.setPower(-.8);
-                autoPilot(4.71, 1.57, 160, .85, 4);
                 robot.arm.setPower(0);
-                autoPilot(0, 1.57, 60, .7, 4);
-                autoPilot(1.1, 1.1, 173, .75, 8);
-                autoPilot(4.71, 1.57, 20, .7, 5);
-                autoPilot(3.14, 1.57, 35, .7, 5);
-                autoPilot(1.57, 1.57, 40, .65, 5);
-                while (robot.rightBottomColor.alpha() < 1000 && runtime.seconds() < 3) {
-                    robot.leftDrive.setPower(0.3);
-                    robot.rightDrive.setPower(0.3);
-                    robot.leftBackDrive.setPower(0.3);
-                    robot.rightBackDrive.setPower(0.3);
-                }
-                robot.leftDrive.setPower(0);
-                robot.rightDrive.setPower(0);
-                robot.leftBackDrive.setPower(0);
-                robot.rightBackDrive.setPower(0);
+                autoPowerShot(.75,1);
+                autoPilot(4.35, 1.57, 145, .85, 4);
+                autoPilot(0, 1.57, 50, .7, 4);
+                autoPilot(1.15, 1.15, 180, .75, 8);
+                autoPilot(3.14, 0, 40, .7, 5);
+//                autoPilot(3.14, 1.57, 35, .7, 5);
+//                autoPilot(1.57, 1.57, 40, .65, 5);
+//                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 3) {
+//                    whileAutoPilot(4.71, 1.57, .3);
+//                }
+//                brake();
             }
 
             stop();
