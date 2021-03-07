@@ -395,26 +395,26 @@ public class RedAuto extends LinearOpMode {
                 robot.flyWheel.setPower(1);
                 waitMilis(3500);
                 robot.finalEscapeServo.setPosition(closedEscape);
-                autoPilot(4.71,1.57,50,.56,4);
+                autoPilot(4.71, 1.57, 50, .56, 4);
                 robot.rollers.setPower(-.6);
-                autoPilot(0,0,50,.4,4);
-                autoPilot(3.14,0,20,.6,3);
+                autoPilot(0, 0, 50, .4, 4);
+                autoPilot(3.14, 0, 20, .6, 3);
                 robot.rollers.setPower(1);
-                autoPilot(0,0,70,.55,4);
+                autoPilot(0, 0, 70, .55, 4);
                 robot.rollers.setPower(-.6);
-                autoPilot(3.14,0,30,.65,3);
+                autoPilot(3.14, 0, 30, .65, 3);
                 robot.rollers.setPower(1);
-                autoPilot(0,0,50,.55,4);
-                autoPilot(3.14,0,30,.65,3);
-                autoPilot(0,0,40,.55,4);
-                autoPilot(3.14,0,10,.65,3);
+                autoPilot(0, 0, 50, .55, 4);
+                autoPilot(3.14, 0, 30, .65, 3);
+                autoPilot(0, 0, 40, .55, 4);
+                autoPilot(3.14, 0, 10, .65, 3);
                 waitMilis(200);
-                autoPilot(3.14,0, 85 - robot.frontDistance.getDistance(DistanceUnit.CM),.5,5);
-                autoPilot(1.57,1.57,25,.6,4);
+                autoPilot(3.14, 0, 85 - robot.frontDistance.getDistance(DistanceUnit.CM), .5, 5);
+                autoPilot(1.57, 1.57, 25, .6, 4);
                 robot.rollers.setPower(-1);
                 robot.finalEscapeServo.setPosition(openEscape);
                 waitMilis(2500);
-                autoPilot(1.57,1.57,8,1,1);
+                autoPilot(1.57, 1.57, 8, 1, 1);
 
             } else if (single) {
                 telemetry.addData("Working?", "Single");
@@ -457,19 +457,25 @@ public class RedAuto extends LinearOpMode {
                 robot.flyWheel.setPower(1);
                 autoPilot(5.25, 0, 35, .8, 5);
                 autoPilot(0, 0, 35, .7, 5);
-                autoPilot(4.71,1.57,50,.6,4);
+                autoPilot(4.71, 1.57, 50, .6, 4);
                 robot.rollers.setPower(0);
-                autoPilot(3.14,1.57,50,.7,4);
-                autoPilot(1.45,1.45,210,.5,5);
-                autoPilot(4.71,2.4,25,1,3);
+                autoPilot(3.14, 1.57, 50, .7, 4);
+                autoPilot(1.45, 1.45, 210, .5, 5);
+                autoPilot(4.71, 2.4, 25, 1, 3);
                 robot.finalEscapeServo.setPosition(openEscape);
                 waitMilis(500);
-                autoPilot(1.57,1.57,5,1,3);
+                autoPilot(1.57, 1.57, 5, 1, 3);
 
 
             } else {
                 telemetry.addData("Working?", "None");
                 telemetry.update();
+                autoPilot(1.57, 1.57, 155, .75, 5);
+                runtime.reset();
+                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 4) {
+                    whileAutoPilot(1.57, 1.57, .25);
+                }
+                brake();
                 robot.flyWheel.setPower(.75);
                 autoPilot(2.5, 3.14, 20, .75, 5);
                 robot.arm.setPower(1);
@@ -488,7 +494,7 @@ public class RedAuto extends LinearOpMode {
                 autoPilot(4.71, 1.57, 37, .4, 5);
                 autoPilot(3.14, 1.57, 5, .45, 1);
                 robot.arm.setPower(0);
-                autoPowerShot(.75,1);
+                autoPowerShot(.75, 1);
                 autoPilot(4.35, 1.57, 145, .85, 4);
                 autoPilot(0, 1.57, 50, .7, 4);
                 autoPilot(1.15, 1.15, 180, .75, 8);
