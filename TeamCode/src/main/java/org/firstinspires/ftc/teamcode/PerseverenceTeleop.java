@@ -38,6 +38,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.BatteryChecker;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -404,14 +405,14 @@ PerseverenceTeleop extends LinearOpMode {
             // Send telemetry message to signify robot running;
             double currentHeading = -imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             double headingRadians = -((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416);
-
+            autoAim();
             telemetry.addData("Heading", headingRadians);
-            telemetry.addData("RightColor", robot.rightBottomColor.alpha());
-            telemetry.addData("LeftColor", robot.leftBottomColor.alpha());
-            telemetry.addData("Distance", robot.frontDistance.getDistance(DistanceUnit.CM));
+//            telemetry.addData("RightColor", robot.rightBottomColor.alpha());
+//            telemetry.addData("LeftColor", robot.leftBottomColor.alpha());
+//            telemetry.addData("Distance", robot.frontDistance.getDistance(DistanceUnit.CM));
             // Provide feedback as to where the robot is located (if we know).
             //autoAim();
-            telemetry.addData("RPMFly", getRPM(robot.flyWheel, 28));
+            // telemetry.addData("RPMFly", getRPM(robot.flyWheel, 28));
             telemetry.update();
         }
         targetsUltimateGoal.deactivate();
@@ -520,53 +521,45 @@ PerseverenceTeleop extends LinearOpMode {
             // express the rotation of the robot in degrees.
             Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
             telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+            double x = translation.get(0) * 2.54;
+            double y = translation.get(1) * 2.54;
+
             double x1 = 3;
             double y1 = -14;
 
-            //double x2 = -72 + (robot.frontDistance.getDistance(DistanceUnit.INCH) + 8.1);
-            double x2 = translation.get(0);
-            double y2 = translation.get(1);
-
             double dx;
             double dy;
-            double translationDistance;
-            double translationAngle;
+            double d;
+            double AngleO;
 
-            if (false) {
+            if (gamepad1.back) {
                 robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 robot.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 robot.leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 runtime.reset();
-//                while (robot.frontDistance.getDistance(DistanceUnit.INCH) > 322 && runtime.seconds() < 5) {
-//                    robot.leftDrive.setPower(1.0);
-//                    robot.rightDrive.setPower(1.0);
-//                    robot.leftBackDrive.setPower(1.0);
-//                    robot.rightBackDrive.setPower(1.0);
-//                }
+
                 robot.leftDrive.setPower(0);
                 robot.rightDrive.setPower(0);
                 robot.leftBackDrive.setPower(0);
                 robot.rightBackDrive.setPower(0);
-                dx = x1 - x2;
-                dy = y1 - y2;
-                translationDistance = (dx * dx) + (dy * dy);
-                translationDistance = Math.sqrt(translationDistance);
+                dx = x - x1;
+                dy = y - y1;
+                d = Math.sqrt((dx * dx) + (dy * dy));
                 telemetry.addData("x1", x1);
-                telemetry.addData("x2", x2);
+                telemetry.addData("x", x);
                 telemetry.addData("y1", y1);
-                telemetry.addData("y2", y2);
+                telemetry.addData("y", y);
                 telemetry.addData("dx", dx);
                 telemetry.addData("dy", dy);
-                translationAngle = Math.atan(dy / dx);
-                translationAngle = (translationAngle * (Math.PI / 180));
-                translationAngle = (4.71 - translationAngle);
-                //  translationAngle = ((180 - (translationAngle)) * (Math.PI / 180));
-                telemetry.addData("Distance", translationDistance);
-                telemetry.addData("Angle", translationAngle * (180 / Math.PI));
-                telemetry.addData("Angle Before", Math.atan(dy / dx));
-                telemetry.addData("Angle Raidians", translationAngle);
-                //autoPilot(translationAngle, 1.57, translationDistance * 2.54, .25, 10);
+                AngleO = Math.atan(dy / dx);
+                AngleO = (AngleO * (Math.PI / 180));
+                AngleO = (4.71 - AngleO);
+                //  AngleO = ((180 - (AngleO)) * (Math.PI / 180));
+                telemetry.addData("d", d);
+                telemetry.addData("AngleO", AngleO * (180 / Math.PI));
+                telemetry.addData("AngleO Raidians", AngleO);
+                //autoPilot(AngleO, 1.57, d * 2.54, .25, 10);
             }
 
 
