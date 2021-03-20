@@ -145,6 +145,7 @@ public class HardwarePerseverence {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         rollers.setDirection(DcMotorSimple.Direction.REVERSE);
+        flyWheel.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
         // Set all motors to zero power
@@ -169,7 +170,7 @@ public class HardwarePerseverence {
         rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+       flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //choker.scaleRange(.3,.5);
 
 

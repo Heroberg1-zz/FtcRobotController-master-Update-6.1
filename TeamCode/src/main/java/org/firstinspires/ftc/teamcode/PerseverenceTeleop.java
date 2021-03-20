@@ -38,7 +38,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.BatteryChecker;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -366,9 +365,8 @@ PerseverenceTeleop extends LinearOpMode {
                 flyWheelSlow = false;
             }
             if (flywheelOn) {
-                setRPM(robot.flyWheel, 28, 5500, 0.7);
-                //robot.flyWheel.setPower(1);
-                //setRPM(robot.flyWheel, 28, 2000, 0.6);
+                getRPM(robot.flyWheel, 28);
+                setRPM(robot.flyWheel, 3000);
             }
             if (gamepad2.back) {
                 flyWheelSlow = true;
@@ -412,7 +410,6 @@ PerseverenceTeleop extends LinearOpMode {
 //            telemetry.addData("Distance", robot.frontDistance.getDistance(DistanceUnit.CM));
             // Provide feedback as to where the robot is located (if we know).
             //autoAim();
-            // telemetry.addData("RPMFly", getRPM(robot.flyWheel, 28));
             telemetry.update();
         }
         targetsUltimateGoal.deactivate();
@@ -423,7 +420,7 @@ PerseverenceTeleop extends LinearOpMode {
     double oldTime = runtime.seconds();
     int loop = 0;
     int oldMotorPos = 0;
-    int rpm = 0;
+    int rpmCurr = 0;
 
     public double getRPM(DcMotor motor,
                          double encoderTicksPerRev) {
@@ -438,76 +435,106 @@ PerseverenceTeleop extends LinearOpMode {
                 break;
             case 2:
                 currTime = runtime.seconds();
-                if (currTime - oldTime > 1) {
+                if (currTime - oldTime > .01) {
                     time = ((currTime - oldTime));
-                    rpm = (int) ((((motor.getCurrentPosition() - oldMotorPos) / encoderTicksPerRev) / time) * 60);
+                    rpmCurr = (int) -((((motor.getCurrentPosition() - oldMotorPos) / encoderTicksPerRev) / time) * 60);
                     loop = 0;
                 }
                 break;
         }
-        return rpm;
+        return rpmCurr;
     }
 
-    double currTimeSet = runtime.seconds();
-    double timeSet;
-    double oldTimeSet = runtime.seconds();
-    int loopSet = 0;
-    int oldMotorPosSet = 0;
-    int rpmSet = 0;
+    int lastRpm = 0;
+    int rpmDiff = 0;
+    double P = 0;
+    double I = 0;
+    double D = 0;
+    int setRpmLoop = 0;
+    double setRpmCurrTime = runtime.seconds();
+    double setRpmOldTime = runtime.seconds();
 
     public void setRPM(DcMotor motor,
-                       double encoderTicksPerRev,
-                       int setRPM,
-                       double initPower) {
-        switch (loopSet) {
+                       int setRPM) {
+        switch (setRpmLoop) {
             case 0:
-                motor.setPower(initPower);
-                loopSet++;
+                setRpmLoop++;
                 break;
             case 1:
-                oldMotorPosSet = motor.getCurrentPosition();
-                oldTimeSet = runtime.seconds();
-                loopSet++;
+                setRpmOldTime = runtime.seconds();
+                setRpmLoop++;
                 break;
             case 2:
-                currTimeSet = runtime.seconds();
-                timeSet = currTimeSet - oldTimeSet;
-                if (timeSet > 2) {
-                    loopSet++;
+                setRpmCurrTime = runtime.seconds();
+                if (setRpmCurrTime - setRpmOldTime > .01) {
+                    double kP = 0.0002, kI = 0.0002, kD = -0.000;
+                    rpmDiff = rpmCurr - setRPM;
+                    P = rpmDiff;
+                    I = Math.max(-1/kI, Math.min(I + rpmDiff * 0.01, 1/kI));
+                    D = lastRpm - rpmCurr;
+                    motor.setPower(setRPM / 6000 + (kP * P + kI * I + kD * D));
+                    telemetry.addData("RPM", rpmCurr);
+                    telemetry.addData("SetRpm", setRPM);
+                    telemetry.addData("Motor Power", motor.getPower());
+                    telemetry.addData("P", P);
+                    telemetry.addData("I", I);
+                    telemetry.addData("D", D);
+                    lastRpm = rpmCurr;
+                    setRpmLoop = 1;
                 }
-                break;
-            case 3:
-                rpmSet = Math.abs(rpm - setRPM);
-                double dampener;
-                if (rpmSet > 150) {
-                    dampener = 1;
-                } else if (rpmSet > 120) {
-                    dampener = .8;
-                } else if (rpmSet > 100) {
-                    dampener = .6;
-                } else if (rpmSet > 80) {
-                    dampener = .4;
-                } else if (rpmSet > 50) {
-                    dampener = .2;
-                } else if (rpmSet > 30) {
-                    dampener = .1;
-                } else {
-                    dampener = .05;
-                }
-                if (rpm > setRPM) {
-                    motor.setPower(motor.getPower() - 0.05 * dampener);
-                } else if (rpm < setRPM) {
-                    motor.setPower(motor.getPower() + 0.05 * dampener);
-                }
-                loopSet = 1;
                 break;
         }
-        telemetry.addData("oldMotorPos", oldMotorPosSet);
-        telemetry.addData("oldTime", oldTimeSet);
-        telemetry.addData("currTime", currTimeSet);
-        telemetry.addData("time", timeSet);
-        telemetry.addData("rpm", rpm);
-        telemetry.addData("motor powwer", motor.getPower());
+
+
+//        switch (loopSet) {
+//            case 0:
+//                motor.setPower(initPower);
+//                loopSet++;
+//                break;
+//            case 1:
+//                oldMotorPosSet = motor.getCurrentPosition();
+//                oldTimeSet = runtime.seconds();
+//                loopSet++;
+//                break;
+//            case 2:
+//                currTimeSet = runtime.seconds();
+//                timeSet = currTimeSet - oldTimeSet;
+//                if (timeSet > 2) {
+//                    loopSet++;
+//                }
+//                break;
+//            case 3:
+//                rpmDiff = Math.abs(rpm - setRPM);
+//                double dampener;
+//                if (rpmDiff > 150) {
+//                    dampener = 1;
+//                } else if (rpmDiff > 120) {
+//                    dampener = .8;
+//                } else if (rpmDiff > 100) {
+//                    dampener = .6;
+//                } else if (rpmDiff > 80) {
+//                    dampener = .4;
+//                } else if (rpmDiff > 50) {
+//                    dampener = .2;
+//                } else if (rpmDiff > 30) {
+//                    dampener = .1;
+//                } else {
+//                    dampener = .05;
+//                }
+//                if (rpm > setRPM) {
+//                    motor.setPower(motor.getPower() - 0.05 * dampener);
+//                } else if (rpm < setRPM) {
+//                    motor.setPower(motor.getPower() + 0.05 * dampener);
+//                }
+//                loopSet = 1;
+//                break;
+//        }
+//        telemetry.addData("oldMotorPos", oldMotorPosSet);
+//        telemetry.addData("oldTime", oldTimeSet);
+//        telemetry.addData("currTime", currTimeSet);
+//        telemetry.addData("time", timeSet);
+//        telemetry.addData("rpm", rpm);
+//        telemetry.addData("motor powwer", motor.getPower());
     }
 
     public void autoAim() {
