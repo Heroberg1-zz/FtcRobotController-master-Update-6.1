@@ -136,7 +136,7 @@ public class HardwarePerseverence {
         /** I2C */
         rightBottomColor = hwMap.get(ColorSensor.class, "bottomColor");
         leftBottomColor = hwMap.get(ColorSensor.class, "leftBottomColor");
-        escapeSensor = hwMap.get(DistanceSensor.class,"escapeSensor");
+        escapeSensor = hwMap.get(DistanceSensor.class, "escapeSensor");
         frontDistance = hwMap.get(DistanceSensor.class, "frontDistance");
         /** USB */
         webcam = hwMap.get(WebcamName.class, "webcam");
@@ -145,7 +145,7 @@ public class HardwarePerseverence {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         rollers.setDirection(DcMotorSimple.Direction.REVERSE);
-        flyWheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        flyWheel.setDirection(DcMotorSimple.Direction.FORWARD);
 
 
         // Set all motors to zero power
@@ -170,7 +170,8 @@ public class HardwarePerseverence {
         rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flyWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         //choker.scaleRange(.3,.5);
 
 
