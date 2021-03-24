@@ -80,6 +80,7 @@ public class HardwarePerseverence {
     public Servo aimbot = null;
     public Servo escapeServo = null;
     public Servo finalEscapeServo = null;
+    public Servo chopper = null;
     /** Analog */
     /**
      * Digital
@@ -128,6 +129,7 @@ public class HardwarePerseverence {
         aimbot = hwMap.get(Servo.class, "aimbot");
         escapeServo = hwMap.get(Servo.class, "escapeServo");
         finalEscapeServo = hwMap.get(Servo.class, "finalEscapeServo");
+        chopper = hwMap.get(Servo.class, "chopper");
         /** Analog */
         /** Digital */
         chokerSwitch = hwMap.get(AnalogInput.class, "chokerSwitch");

@@ -254,6 +254,7 @@ PerseverenceTeleop extends LinearOpMode {
         robot.flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Send telemetry message to signify robot waiting;
+        robot.chopper.setPosition(0.9);
         robot.escapeServo.setPosition(openEscape);
         robot.finalEscapeServo.setPosition(openEscape);
         telemetry.addData("Pushbot:", "Hello Driver");    //
@@ -383,6 +384,13 @@ PerseverenceTeleop extends LinearOpMode {
             if (gamepad2.y) {
                 //shoot ring
                 autoPowerShot(.775, 1);
+            }
+
+            //chopper
+            if (gamepad1.left_trigger > 0.5) {
+                robot.chopper.setPosition(.03);
+            } else {
+                robot.chopper.setPosition(.9);
             }
 
             // slow mode
