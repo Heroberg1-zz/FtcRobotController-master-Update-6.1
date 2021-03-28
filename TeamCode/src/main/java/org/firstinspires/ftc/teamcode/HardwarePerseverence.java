@@ -86,6 +86,7 @@ public class HardwarePerseverence {
      * Digital
      */
     public AnalogInput chokerSwitch = null;
+    public AnalogInput sideSwitch = null;
     //   public AnalogInput leftMarker = null;
     //  public AnalogInput rightMarker = null;
     /**
@@ -133,6 +134,7 @@ public class HardwarePerseverence {
         /** Analog */
         /** Digital */
         chokerSwitch = hwMap.get(AnalogInput.class, "chokerSwitch");
+        sideSwitch = hwMap.get(AnalogInput.class, "wallSwitch");
         //  leftMarker = hwMap.get(AnalogInput.class, "leftMarker");
         //   rightMarker = hwMap.get(AnalogInput.class, "rightMarker");
         /** I2C */

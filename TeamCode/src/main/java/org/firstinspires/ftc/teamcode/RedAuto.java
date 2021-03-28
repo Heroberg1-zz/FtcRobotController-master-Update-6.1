@@ -46,7 +46,10 @@ public class RedAuto extends LinearOpMode {
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;
     double openEscape = 0;
-    double closedEscape = .2;
+    double closedEscape = .3;
+    double finalOpenEscape = .05;
+    double finalClosedEscape = .255;
+
 
     public double subtractAngle(double angleA,
                                 double angleB) {
@@ -267,7 +270,7 @@ public class RedAuto extends LinearOpMode {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minResultConfidence = 0.8f;
+        tfodParameters.minResultConfidence = 0.85f;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
     }
@@ -282,18 +285,18 @@ public class RedAuto extends LinearOpMode {
         parameters.loggingTag = "IMU";
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
+        robot.choker.setPosition(.4125);
         initVuforia();
         initTfod();
         if (tfod != null) {
             tfod.activate();
-
             // The TensorFlow software will scale the input images from the camera to a lower resolution.
             // This can result in lower detection accuracy at longer distances (> 55cm or 22").
             // If your target is at distance greater than 50 cm (20") you can adjust the magnification value
             // to artificially zoom in to the center of image.  For best results, the "aspectRatio" argument
             // should be set to the value of the images used to create the TensorFlow Object Detection model
             // (typically 16/9).
-            tfod.setZoom(2.25, 5.0 / 3.0);
+            tfod.setZoom(2.2, 3.25 / 1.0);
         }
         //reset the encoders to 0
         robot.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -332,7 +335,7 @@ public class RedAuto extends LinearOpMode {
                             single = true;
                             quad = false;
                             none = false;
-                        } else { /** None **/
+                        } else if (recognition.getLabel() == "None") { /** None **/
                             none = true;
                             single = false;
                             quad = false;
@@ -345,7 +348,7 @@ public class RedAuto extends LinearOpMode {
                 telemetry.addData("Stack", "Quad");
             } else if (single) {
                 telemetry.addData("Stack", "Single");
-            } else {
+            } else if (none) {
                 telemetry.addData("Stack", "None");
             }
             telemetry.update();
@@ -362,121 +365,119 @@ public class RedAuto extends LinearOpMode {
             if (quad) {
                 telemetry.addData("Working?", "Quad");
                 telemetry.update();
-                autoPilot(1.57, 1.57, 165, .75, 5);
+                robot.flyWheel.setPower(.8);
+                autoPilot(1.57, 1.57, 145, .8, 5);
                 runtime.reset();
-                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 4) {
-                    whileAutoPilot(1.57, 1.57, .25);
+                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 2.5) {
+                    whileAutoPilot(1.57, 1.57, .35);
                 }
                 brake();
-                autoPilot(1.55, 4.71, 25, .7, 6);
-                //autoPilot(0,4.71,3,.6,3);
+                runtime.reset();
+                while (robot.sideSwitch.getVoltage() < 3 && runtime.seconds() < 3) {
+                    whileAutoPilot(.3, 4.71, .7);
+                }
+                brake();
+                runtime.reset();
+                while ((robot.rightBottomColor.red() < 500 || robot.rightBottomColor.red() > 1000) && runtime.seconds() < 2) {
+                    whileAutoPilot(1.57, 4.71, .35);
+                }
+                brake();
                 robot.arm.setPower(1);
-                waitMilis(1000);
-                robot.arm.setPower(0);
-                waitMilis(200);
+                waitMilis(900);
                 robot.choker.setPosition(0);
-                waitMilis(150);
-                robot.arm.setPower(-.85);
-                autoPilot(4.71, 4.71, 15, .6, 4);
-                robot.flyWheel.setPower(.8);
-                autoPilot(3.14, 1.57, 110, .8, 5);
-                robot.flyWheel.setPower(1);
+                robot.arm.setPower(-1);
+                autoPilot(4.71, 4.71, 10, .6, 4);
                 robot.arm.setPower(0);
+                autoPilot(2.6, 1.57, 120, .9, 5);
+                robot.flyWheel.setPower(.85);
                 runtime.reset();
                 while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 3) {
-                    whileAutoPilot(4.71, 1.57, .3);
+                    whileAutoPilot(4.71, 1.57, .35);
                 }
                 brake();
-                autoPilot(4.71, 1.57, 30, .4, 3);
+                autoPilot(4.31, 1.57, 60, .5, 5);
                 robot.peewee.setPower(1);
                 robot.escapeServo.setPosition(openEscape);
                 robot.finalEscapeServo.setPosition(openEscape);
                 robot.lookingGlass.setPower(1);
-                robot.flyWheel.setPower(1);
-                waitMilis(3500);
+                robot.flyWheel.setPower(.85);
+                waitMilis(3250);
                 robot.finalEscapeServo.setPosition(closedEscape);
-                autoPilot(4.71, 1.57, 50, .56, 4);
-                robot.rollers.setPower(-.6);
-                autoPilot(0, 0, 50, .4, 4);
-                autoPilot(3.14, 0, 20, .6, 3);
+                autoPilot(4.71, 1.57, 45, .6, 4);
+                autoPilot(1.57, 0, 20, .5, 4);
+                autoPilot(0, 0, 3, .3, 2);
+                robot.chopper.setPosition(.03);
+                autoPilot(1.57, 0, 84.34, .35, 5);
+                robot.chopper.setPosition(.9);
+                autoPilot(1.57, 0, 30, .6, 5);
+                autoPilot(6, 4.71, 20, .6, 4);
+                autoPilot(0, 4.71, 40, .6, 3);
                 robot.rollers.setPower(1);
-                autoPilot(0, 0, 70, .55, 4);
-                robot.rollers.setPower(-.6);
-                autoPilot(3.14, 0, 30, .65, 3);
-                robot.rollers.setPower(1);
-                autoPilot(0, 0, 50, .55, 4);
-                autoPilot(3.14, 0, 30, .65, 3);
-                autoPilot(0, 0, 40, .55, 4);
-                autoPilot(3.14, 0, 10, .65, 3);
-                waitMilis(200);
-                autoPilot(3.14, 0, 85 - robot.frontDistance.getDistance(DistanceUnit.CM), .5, 5);
-                autoPilot(1.57, 1.57, 25, .6, 4);
-                robot.rollers.setPower(-1);
+                autoPilot(4.71, 4.71, 80, .6, 6);
+                robot.flyWheel.setPower(.85);
+                autoPilot(2.8, 1.57, 60, 1, 3);
+                robot.chopper.setPosition(.03);
                 robot.finalEscapeServo.setPosition(openEscape);
-                waitMilis(2500);
-                autoPilot(1.57, 1.57, 8, 1, 1);
+                waitMilis(2000);
+
 
             } else if (single) {
                 telemetry.addData("Working?", "Single");
                 telemetry.update();
-                autoPilot(0, 1.57, 25, .7, 6);
-                autoPilot(1.57, 4.71, 90, .75, 5);
-                runtime.reset();
-                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 2) {
-                    whileAutoPilot(1.57, 4.71, .25);
+                robot.flyWheel.setPower(.7);
+                autoPilot(0, 1.57, 35, .7, 6);
+                autoPilot(3.14, 1.57, 10, .5, 4);
+                autoPilot(1.57, 1.57, 100, 1, 4);
+                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 4) {
+                    whileAutoPilot(1.57, 1.57, .3);
                 }
                 brake();
-                //gyroTurn(0,5);
-                autoPilot(3.14, 4.71, 50, .75, 5);
-                //robot.flyWheel.setPower(.75);
-                autoPilot(1.57, 4.71, 15, .7, 4);
+                autoPilot(3.14, 3.14, 100, .7, 4);
+                autoPilot(1.57, 3.14, 78.4, .6, 4);
                 robot.arm.setPower(1);
-                waitMilis(1000);
-                robot.arm.setPower(0);
-                waitMilis(200);
+                waitMilis(1200);
                 robot.choker.setPosition(0);
+                robot.arm.setPower(0);
                 waitMilis(150);
                 robot.arm.setPower(-.85);
-                robot.flyWheel.setPower(.75);
-                autoPilot(3.14, 3.14, 95, .6, 4);
+                autoPilot(3.14, 1.57, 50, .9, 4);
                 robot.arm.setPower(0);
-                autoPilot(1.57, 1.57, 15, .6, 3);
-                runtime.reset();
-                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 3) {
-                    whileAutoPilot(4.71, 1.57, .3);
+                autoPilot(4.71, 1.57, 30, .85, 3);
+                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 4) {
+                    whileAutoPilot(4.71, 1.57, .35);
                 }
                 brake();
-                autoPilot(4.71, 1.57, 40, .4, 3);
-                autoPilot(3.14, 1.57, 20, .45, 2);
-                autoPowerShot(.75, 1);
+                autoPilot(4.71, 1.57, 30, .5, 4);
+                runtime.reset();
+                while (robot.sideSwitch.getVoltage() < 3 && runtime.seconds() < 4) {
+                    whileAutoPilot(3.14, 1.57, .5);
+                }
+                brake();
+                autoPowerShot(.7, 1);
+                autoPilot(0,4.71,80,.6,5);
                 robot.rollers.setPower(1);
                 robot.peewee.setPower(1);
-                robot.escapeServo.setPosition(openEscape);
-                robot.finalEscapeServo.setPosition(closedEscape);
                 robot.lookingGlass.setPower(1);
-                robot.flyWheel.setPower(1);
-                autoPilot(5.25, 0, 35, .8, 5);
-                autoPilot(0, 0, 35, .7, 5);
-                autoPilot(4.71, 1.57, 50, .6, 4);
-                robot.rollers.setPower(0);
-                autoPilot(3.14, 1.57, 50, .7, 4);
-                autoPilot(1.45, 1.45, 210, .5, 5);
-                autoPilot(4.71, 2.4, 25, 1, 3);
-                robot.finalEscapeServo.setPosition(openEscape);
-                waitMilis(500);
-                autoPilot(1.57, 1.57, 5, 1, 3);
-
+                robot.flyWheel.setPower(.8);
+                robot.finalEscapeServo.setPosition(finalClosedEscape);
+                autoPilot(4.71,4.71,70,.5,5);
+                autoPilot(4.71,1.57,45,.7,3);
+                autoPilot(3.14,1.57,45,.67,4);
+                autoPilot(1.45,1.45,210,.65,4);
+                autoPilot(4,1.57,70,.7,4);
+                robot.finalEscapeServo.setPosition(finalOpenEscape);
+                robot.chopper.setPosition(.03);
 
             } else {
                 telemetry.addData("Working?", "None");
                 telemetry.update();
+                robot.flyWheel.setPower(.75);
                 autoPilot(1.57, 1.57, 155, .75, 5);
                 runtime.reset();
                 while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 4) {
                     whileAutoPilot(1.57, 1.57, .25);
                 }
                 brake();
-                robot.flyWheel.setPower(.75);
                 autoPilot(2.5, 3.14, 20, .75, 5);
                 robot.arm.setPower(1);
                 waitMilis(1000);
@@ -484,8 +485,12 @@ public class RedAuto extends LinearOpMode {
                 waitMilis(400);
                 robot.choker.setPosition(0);
                 waitMilis(500);
-                autoPilot(3.14, 1.57, 175, .6, 4);
+                runtime.reset();
+                while (robot.sideSwitch.getVoltage() < 3 && runtime.seconds() < 4) {
+                    whileAutoPilot(3.14, 1.57, .6);
+                }
                 autoPilot(0, 1.57, 2, .4, 1);
+                runtime.reset();
                 while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 3) {
                     whileAutoPilot(4.71, 1.57, .3);
                 }
@@ -497,14 +502,15 @@ public class RedAuto extends LinearOpMode {
                 autoPowerShot(.75, 1);
                 autoPilot(4.35, 1.57, 145, .85, 4);
                 autoPilot(0, 1.57, 50, .7, 4);
-                autoPilot(1.15, 1.15, 180, .75, 8);
-                autoPilot(3.14, 0, 40, .7, 5);
-//                autoPilot(3.14, 1.57, 35, .7, 5);
-//                autoPilot(1.57, 1.57, 40, .65, 5);
-//                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 3) {
-//                    whileAutoPilot(4.71, 1.57, .3);
-//                }
-//                brake();
+                autoPilot(1.1, 1.1, 180, .75, 8);
+                autoPilot(3.14, 1.57, 40, .7, 5);
+                autoPilot(3.14, 1.57, 35, .7, 5);
+                autoPilot(1.57, 1.57, 50, .65, 5);
+                runtime.reset();
+                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 3) {
+                    whileAutoPilot(4.71, 1.57, .3);
+                }
+                brake();
             }
 
             stop();

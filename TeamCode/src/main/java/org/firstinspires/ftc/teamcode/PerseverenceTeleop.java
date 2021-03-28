@@ -125,6 +125,10 @@ PerseverenceTeleop extends LinearOpMode {
     private float phoneXRotate = 0;
     private float phoneYRotate = 0;
     private final float phoneZRotate = 0;
+    double openEscape = 0;
+    double closedEscape = .3;
+    double finalOpenEscape = .05;
+    double finalClosedEscape = .255;
 
 
 
@@ -150,8 +154,10 @@ PerseverenceTeleop extends LinearOpMode {
         double oldTime = 0.0;
         double oldTime1 = 0.0;
         boolean longEscape = false;
-        double openEscape = 0;
-        double closedEscape = .2;
+//        double openEscape = 0;
+//        double closedEscape = .3;
+//        double finalOpenEscape = 0;
+//        double finalClosedEscape = .25;
         boolean flywheelOn = false;
         boolean chokerClosed = false;
         boolean flyWheelSlow = false;
@@ -256,7 +262,7 @@ PerseverenceTeleop extends LinearOpMode {
         // Send telemetry message to signify robot waiting;
         robot.chopper.setPosition(0.9);
         robot.escapeServo.setPosition(openEscape);
-        robot.finalEscapeServo.setPosition(openEscape);
+        robot.finalEscapeServo.setPosition(finalOpenEscape);
         telemetry.addData("Pushbot:", "Hello Driver");    //
         telemetry.update();
 
@@ -303,23 +309,23 @@ PerseverenceTeleop extends LinearOpMode {
                     if (gamepad2.a) {
                         oldTime = runtime.milliseconds();
                         robot.escapeServo.setPosition(openEscape);
-                        robot.finalEscapeServo.setPosition(openEscape);
+                        robot.finalEscapeServo.setPosition(finalOpenEscape);
                         longEscape = false;
                         escape++;
                     } else if (gamepad2.b) {
                         oldTime = runtime.milliseconds();
                         robot.escapeServo.setPosition(openEscape);
-                        robot.finalEscapeServo.setPosition(openEscape);
+                        robot.finalEscapeServo.setPosition(finalOpenEscape);
                         longEscape = true;
                         escape++;
                     }
                     break;
                 case 2:
                     if (runtime.milliseconds() > oldTime + 400 && !longEscape) {
-                        robot.finalEscapeServo.setPosition(closedEscape);
+                        robot.finalEscapeServo.setPosition(finalClosedEscape);
                         escape++;
                     } else if (runtime.milliseconds() > oldTime + 2500 && longEscape) {
-                        robot.finalEscapeServo.setPosition(closedEscape);
+                        robot.finalEscapeServo.setPosition(finalClosedEscape);
                         escape++;
                     } else {
                         break;
@@ -364,13 +370,13 @@ PerseverenceTeleop extends LinearOpMode {
             }
             //shooter on
             if (gamepad2.dpad_left) {
-                robot.flyWheel.setPower(.6);
+                robot.flyWheel.setPower(.8);
                 flywheelOn = true;
                 flyWheelSlow = false;
             }
             if (flywheelOn) {
                 getRPM(robot.flyWheel, 28);
-                robot.flyWheel.setPower(.5);
+//                robot.flyWheel.setPower(.8);
                 //setRPM(robot.flyWheel, 3000);
             }
             if (gamepad2.back) {
@@ -419,6 +425,7 @@ PerseverenceTeleop extends LinearOpMode {
             telemetry.addData("Heading", headingRadians);
             telemetry.addData("RPM", rpmCurr);
             telemetry.addData("Motor Power", robot.flyWheel.getPower());
+            telemetry.addData("Color Right", robot.rightBottomColor.red());
 //            telemetry.addData("RightColor", robot.rightBottomColor.alpha());
 //            telemetry.addData("LeftColor", robot.leftBottomColor.alpha());
 //            telemetry.addData("Distance", robot.frontDistance.getDistance(DistanceUnit.CM));
@@ -579,15 +586,15 @@ PerseverenceTeleop extends LinearOpMode {
 
     public void autoPowerShot(double flyWheelPower,
                               double lookingGlassPower) {
-        double openEscape = 0;
-        double closedEscape = .2;
+//        double openEscape = 0;
+//        double closedEscape = .2;
         double time;
         robot.flyWheel.setPower(flyWheelPower);
         robot.lookingGlass.setPower(lookingGlassPower);
         waitMilis(500);
         autoPilot(0.0, 1.57, 8, .65, 10);
         robot.escapeServo.setPosition(openEscape);
-        robot.finalEscapeServo.setPosition(openEscape);
+        robot.finalEscapeServo.setPosition(finalOpenEscape);
         time = runtime.milliseconds();
         while (runtime.milliseconds() - time < 2500) {
             whileAutoPilot(0.0, 1.57, .24);
@@ -596,7 +603,7 @@ PerseverenceTeleop extends LinearOpMode {
         robot.rightDrive.setPower(0);
         robot.leftBackDrive.setPower(0);
         robot.rightBackDrive.setPower(0);
-        robot.finalEscapeServo.setPosition(closedEscape);
+        robot.finalEscapeServo.setPosition(finalClosedEscape);
     }
 
     public void imuReset() {
