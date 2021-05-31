@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -13,23 +15,45 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwarePerseverence;
 
-@TeleOp(name = "Motor Test", group = "TeleOp")
+@TeleOp(name = "Tele", group = "TeleOp")
+
+
 public class PerseverenceMotorTest extends LinearOpMode {
-    HardwarePerseverence robot = new HardwarePerseverence();
-    private final ElapsedTime runtime = new ElapsedTime();
     @Override
     public void runOpMode() {
+        HardwarePerseverence robot = new HardwarePerseverence();
+        final ElapsedTime runtime = new ElapsedTime();
+        robot.init(hardwareMap);
+        double r;
+        double robotAngle;
+        double driveSpeed = 1;
+//        robot.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        robot.rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        robot.leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        robot.rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        robot.leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        robot.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.leftBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        telemetry.addData("Testbot:","Waiting for start");
+        telemetry.update();
         waitForStart();
        while (opModeIsActive())  {
-           robot.rightBackDrive.setPower(1.0);
-//           telemetry.addData("Centimeters",robot.escapeSensor.getDistance(DistanceUnit.CM));
-//           telemetry.addData("Heading First Angle", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
-//           telemetry.addData("Heading Second Angle", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).secondAngle);
-//           telemetry.addData("Heading Third Angle", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle);
-//           telemetry.update();
-//           while (robot.rightBottomColor.alpha() < 1000 || robot.leftBottomColor.alpha() < 1000 && runtime.seconds() < 6) {
-//               whileAutoPilot(1.57, 1.57, .4);
-//           }
+           double rightX = gamepad1.right_stick_x;
+           r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
+           robotAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
+           final double v1 = r * Math.cos(robotAngle) + rightX;
+           final double v2 = r * Math.sin(robotAngle) - rightX;
+           final double v3 = r * Math.sin(robotAngle) + rightX;
+           final double v4 = r * Math.cos(robotAngle) - rightX;
+           robot.leftDrive.setPower(v1 * driveSpeed);
+           robot.rightDrive.setPower(v2 * driveSpeed);
+           robot.leftBackDrive.setPower(v3 * driveSpeed);
+           robot.rightBackDrive.setPower(v4 * driveSpeed);
         }
     }
 }
