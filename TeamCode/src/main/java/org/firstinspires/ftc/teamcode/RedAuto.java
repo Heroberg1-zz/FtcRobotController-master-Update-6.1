@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -23,6 +24,7 @@ import org.firstinspires.ftc.teamcode.HardwarePerseverence;
 import java.util.List;
 
 @Autonomous(name = "Auto", group = "Pushbot")
+@Disabled
 public class RedAuto extends LinearOpMode {
     // Increase this value to trust encoder odometry less when fusing encoder measurements with VSLAM
     double encoderMeasurementCovariance = 0.8;
