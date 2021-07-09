@@ -422,6 +422,8 @@ PerseverenceTeleop extends LinearOpMode {
             double currentHeading = -imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             double headingRadians = -((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416);
             autoAim();
+            telemetry.addData("Left Trigger", gamepad1.left_trigger);
+            telemetry.addData("Chopper", robot.chopper.getPosition());
             telemetry.addData("Heading", headingRadians);
             telemetry.addData("RPM", rpmCurr);
             telemetry.addData("Motor Power", robot.flyWheel.getPower());

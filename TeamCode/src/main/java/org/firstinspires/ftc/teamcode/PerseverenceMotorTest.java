@@ -17,19 +17,13 @@ import org.firstinspires.ftc.teamcode.HardwarePerseverence;
 public class PerseverenceMotorTest extends LinearOpMode {
     HardwarePerseverence robot = new HardwarePerseverence();
     private final ElapsedTime runtime = new ElapsedTime();
+
     @Override
     public void runOpMode() {
         waitForStart();
-       while (opModeIsActive())  {
-           robot.rightBackDrive.setPower(1.0);
-//           telemetry.addData("Centimeters",robot.escapeSensor.getDistance(DistanceUnit.CM));
-//           telemetry.addData("Heading First Angle", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
-//           telemetry.addData("Heading Second Angle", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).secondAngle);
-//           telemetry.addData("Heading Third Angle", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle);
-//           telemetry.update();
-//           while (robot.rightBottomColor.alpha() < 1000 || robot.leftBottomColor.alpha() < 1000 && runtime.seconds() < 6) {
-//               whileAutoPilot(1.57, 1.57, .4);
-//           }
+        while (opModeIsActive()) {
+            telemetry.addData("Red", robot.rightBottomColor.red());
+            telemetry.update();
         }
     }
 }

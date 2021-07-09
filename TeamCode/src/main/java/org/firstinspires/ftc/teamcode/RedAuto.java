@@ -132,7 +132,7 @@ public class RedAuto extends LinearOpMode {
 
             driveAngle = ((-currentHeading / 180) * 3.1416) + (1 / 2 * 3.1416) + heading;
 //            driveAngle = 0.5*Math.PI;
-//            adjPower = 0;
+            adjPower = subtractAngle(poseDegrees, currentHeading) / 120;
 
             double robotAngle = driveAngle - Math.PI / 4;
             final double v1 = power * Math.cos(robotAngle) - adjPower;
@@ -147,6 +147,7 @@ public class RedAuto extends LinearOpMode {
             robot.rightBackDrive.setPower(v4);
         }
     }
+
 
     public void whileAutoPilot(double heading,
                                double pose,
@@ -270,7 +271,7 @@ public class RedAuto extends LinearOpMode {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minResultConfidence = 0.85f;
+        tfodParameters.minResultConfidence = 0.45f;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
     }
@@ -296,7 +297,7 @@ public class RedAuto extends LinearOpMode {
             // to artificially zoom in to the center of image.  For best results, the "aspectRatio" argument
             // should be set to the value of the images used to create the TensorFlow Object Detection model
             // (typically 16/9).
-            tfod.setZoom(2.2, 3.25 / 1.0);
+            tfod.setZoom(1, 16.0 / 9.0);
         }
         //reset the encoders to 0
         robot.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -312,212 +313,117 @@ public class RedAuto extends LinearOpMode {
         robot.rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         robot.leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         robot.rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        waitMilis(50);
-        waitMilis(1000);
-        boolean quad = false;
-        boolean single = false;
-        boolean none = false;
-        while (!isStarted()) {
-            if (true) {
-                // getUpdatedRecognitions() will return null if no new information is available since
-                // the last time that call was made.
-                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-                if (updatedRecognitions != null) {
-                    //telemetry.addData("# Object Detected", updatedRecognitions.size());
-                    // step through the list of recognitions and display boundary info.
-                    int i = 0;
-                    for (Recognition recognition : updatedRecognitions) {
-                        if (recognition.getLabel() == "Quad") { // Quad
-                            quad = true;
-                            single = false;
-                            none = false;
-                        } else if (recognition.getLabel() == "Single") { // Single
-                            single = true;
-                            quad = false;
-                            none = false;
-                        } else if (recognition.getLabel() == "None") { /** None **/
-                            none = true;
-                            single = false;
-                            quad = false;
-                        }
-                    }
-                }
-            }
-            telemetry.addData("Robot", "Waiting for Start");
-            if (quad) {
-                telemetry.addData("Stack", "Quad");
-            } else if (single) {
-                telemetry.addData("Stack", "Single");
-            } else if (none) {
-                telemetry.addData("Stack", "None");
-            }
-            telemetry.update();
-        }
+        waitMilis(100);
+        telemetry.addData("Robot:", "Ready For Start");
+        telemetry.update();
+        waitForStart();
+
         while (opModeIsActive()) {
             //Universal Start
-            autoPilot(0, 1.57, 30, .7, 6);
-//            autoPilot(1.57, 1.57, 165, .75, 5);
-//            runtime.reset();
-//            while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 4) {
-//                whileAutoPilot(1.57, 1.57, .25);
-//            }
-//            brake();
-            if (quad) {
-                telemetry.addData("Working?", "Quad");
-                telemetry.update();
-                robot.flyWheel.setPower(.8);
-                autoPilot(1.57, 1.57, 145, .8, 5);
-                runtime.reset();
-                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 2.5) {
-                    whileAutoPilot(1.57, 1.57, .35);
-                }
-                brake();
-                runtime.reset();
-                while (robot.sideSwitch.getVoltage() < 3 && runtime.seconds() < 3) {
-                    whileAutoPilot(.3, 4.71, .7);
-                }
-                brake();
-                runtime.reset();
-                while ((robot.rightBottomColor.red() < 500 || robot.rightBottomColor.red() > 1000) && runtime.seconds() < 2) {
-                    whileAutoPilot(1.57, 4.71, .35);
-                }
-                brake();
-                robot.arm.setPower(1);
-                waitMilis(900);
-                robot.choker.setPosition(0);
-                robot.arm.setPower(-1);
-                autoPilot(4.71, 4.71, 10, .6, 4);
-                robot.arm.setPower(0);
-                autoPilot(2.6, 1.57, 120, .9, 5);
-                robot.flyWheel.setPower(.85);
-                runtime.reset();
-                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 3) {
-                    whileAutoPilot(4.71, 1.57, .35);
-                }
-                brake();
-                autoPilot(4.31, 1.57, 60, .5, 5);
-                robot.peewee.setPower(1);
-                robot.escapeServo.setPosition(openEscape);
-                robot.finalEscapeServo.setPosition(openEscape);
-                robot.lookingGlass.setPower(1);
-                robot.flyWheel.setPower(.85);
-                waitMilis(3250);
-                robot.finalEscapeServo.setPosition(closedEscape);
-                autoPilot(4.71, 1.57, 45, .6, 4);
-                autoPilot(1.57, 0, 20, .5, 4);
-                autoPilot(0, 0, 3, .3, 2);
-                robot.chopper.setPosition(.03);
-                autoPilot(1.57, 0, 84.34, .35, 5);
-                robot.chopper.setPosition(.9);
-                autoPilot(1.57, 0, 30, .6, 5);
-                autoPilot(6, 4.71, 20, .6, 4);
-                autoPilot(0, 4.71, 40, .6, 3);
-                robot.rollers.setPower(1);
-                autoPilot(4.71, 4.71, 80, .6, 6);
-                robot.flyWheel.setPower(.85);
-                autoPilot(2.8, 1.57, 60, 1, 3);
-                robot.chopper.setPosition(.03);
-                robot.finalEscapeServo.setPosition(openEscape);
-                waitMilis(2000);
 
+            autoPilot(1.57, 2.7, 20, .8, 6);
+            autoPilot(5.93, 2.7, 5, .7, 6);
+            brake();
+            waitMilis(1000);
+            boolean quad = false;
+            boolean single = false;
+            boolean none = false;
+            // getUpdatedRecognitions() will return null if no new information is available since
+            // the last time that call was made.
+            List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
 
-            } else if (single) {
-                telemetry.addData("Working?", "Single");
-                telemetry.update();
-                robot.flyWheel.setPower(.7);
-                autoPilot(0, 1.57, 35, .7, 6);
-                autoPilot(3.14, 1.57, 10, .5, 4);
-                autoPilot(1.57, 1.57, 100, 1, 4);
-                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 4) {
-                    whileAutoPilot(1.57, 1.57, .3);
+            //telemetry.addData("# Object Detected", updatedRecognitions.size());
+            // step through the list of recognitions and display boundary info.
+            int i = 0;
+            for (Recognition recognition : updatedRecognitions) {
+                if (recognition.getLabel() == "Quad") { // Quad
+                    quad = true;
+                    single = false;
+                    none = false;
+                } else if (recognition.getLabel() == "Single") { // Single
+                    single = true;
+                    quad = false;
+                    none = false;
+                } else { /** None **/
+                    none = true;
+                    single = false;
+                    quad = false;
                 }
-                brake();
-                autoPilot(3.14, 3.14, 100, .7, 4);
-                autoPilot(1.57, 3.14, 78.4, .6, 4);
-                robot.arm.setPower(1);
-                waitMilis(1200);
-                robot.choker.setPosition(0);
-                robot.arm.setPower(0);
-                waitMilis(150);
-                robot.arm.setPower(-.85);
-                autoPilot(3.14, 1.57, 50, .9, 4);
-                robot.arm.setPower(0);
-                autoPilot(4.71, 1.57, 30, .85, 3);
-                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 4) {
-                    whileAutoPilot(4.71, 1.57, .35);
-                }
-                brake();
-                autoPilot(4.71, 1.57, 30, .5, 4);
-                runtime.reset();
-                while (robot.sideSwitch.getVoltage() < 3 && runtime.seconds() < 4) {
-                    whileAutoPilot(3.14, 1.57, .5);
-                }
-                brake();
-                autoPowerShot(.7, 1);
-                autoPilot(0,4.71,80,.6,5);
-                robot.rollers.setPower(1);
-                robot.peewee.setPower(1);
-                robot.lookingGlass.setPower(1);
-                robot.flyWheel.setPower(.8);
-                robot.finalEscapeServo.setPosition(finalClosedEscape);
-                autoPilot(4.71,4.71,70,.5,5);
-                autoPilot(4.71,1.57,45,.7,3);
-                autoPilot(3.14,1.57,45,.67,4);
-                autoPilot(1.45,1.45,210,.65,4);
-                autoPilot(4,1.57,70,.7,4);
-                robot.finalEscapeServo.setPosition(finalOpenEscape);
-                robot.chopper.setPosition(.03);
-
-            } else {
-                telemetry.addData("Working?", "None");
-                telemetry.update();
-                robot.flyWheel.setPower(.75);
-                autoPilot(1.57, 1.57, 155, .75, 5);
-                runtime.reset();
-                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 4) {
-                    whileAutoPilot(1.57, 1.57, .25);
-                }
-                brake();
-                autoPilot(2.5, 3.14, 20, .75, 5);
-                robot.arm.setPower(1);
-                waitMilis(1000);
-                robot.arm.setPower(0);
-                waitMilis(400);
-                robot.choker.setPosition(0);
-                waitMilis(500);
-                runtime.reset();
-                while (robot.sideSwitch.getVoltage() < 3 && runtime.seconds() < 4) {
-                    whileAutoPilot(3.14, 1.57, .6);
-                }
-                autoPilot(0, 1.57, 2, .4, 1);
-                runtime.reset();
-                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 3) {
-                    whileAutoPilot(4.71, 1.57, .3);
-                }
-                brake();
-                robot.arm.setPower(-.9);
-                autoPilot(4.71, 1.57, 37, .4, 5);
-                autoPilot(3.14, 1.57, 5, .45, 1);
-                robot.arm.setPower(0);
-                autoPowerShot(.75, 1);
-                autoPilot(4.35, 1.57, 145, .85, 4);
-                autoPilot(0, 1.57, 50, .7, 4);
-                autoPilot(1.1, 1.1, 180, .75, 8);
-                autoPilot(3.14, 1.57, 40, .7, 5);
-                autoPilot(3.14, 1.57, 35, .7, 5);
-                autoPilot(1.57, 1.57, 50, .65, 5);
-                runtime.reset();
-                while ((robot.rightBottomColor.alpha() < 900 || robot.leftBottomColor.alpha() < 900) && runtime.seconds() < 3) {
-                    whileAutoPilot(4.71, 1.57, .3);
-                }
-                brake();
             }
 
-            stop();
+                if (quad) {
+                    telemetry.addData("Working?", "Quad");
+                    telemetry.update();
+                    autoPilot(1.57, 1.57, 170, .7, 6);
+                    waitMilis(200);
+                    while (robot.rightBottomColor.red() < 500) {
+                        whileAutoPilot(1.57, 1.57, .2);
+                    }
+                    brake();
+                    autoPilot(3.14,4.71,20,.6,6);
+                    robot.arm.setPower(1);
+                    autoPilot(0,4.71,13,.6,6);
+                    waitMilis(200);
+                    robot.choker.setPosition(0);
+                    robot.arm.setPower(0);
+                    waitMilis(500);
+                    robot.arm.setPower(-1);
+                    autoPilot(4.71,4.71,40,.6,6);
+                    robot.arm.setPower(0);
 
-        }
-        if (tfod != null) {
-            tfod.shutdown();
+
+                } else if (single) {
+                    telemetry.addData("Working?", "Single");
+                    telemetry.update();
+                    autoPilot(1.57, 1.57, 170, .7, 6);
+                    waitMilis(200);
+                    while (robot.rightBottomColor.red() < 500) {
+                        whileAutoPilot(1.57, 1.57, .2);
+                    }
+                    brake();
+                    autoPilot(3.14, 0, 20, .5, 6);
+                    robot.arm.setPower(1);
+                    autoPilot(0, 0, 15, .5, 6);
+                    robot.choker.setPosition(0);
+                    waitMilis(300);
+                    robot.arm.setPower(-1);
+                    waitMilis(200);
+                    robot.arm.setPower(0);
+                    autoPilot(4.71, 0, 60, .5, 5);
+                    stop();
+
+
+                } else {
+
+                    telemetry.addData("Working?", "None");
+                    telemetry.update();
+                    autoPilot(1.57, 1.57, 170, .7, 6);
+                    waitMilis(200);
+                    robot.arm.setPower(1);
+                    while (robot.rightBottomColor.red() < 500) {
+                        whileAutoPilot(1.57, 1.57, .2);
+                    }
+                    brake();
+                    autoPilot(1.57,1.57,10,.5,4);
+                    robot.choker.setPosition(0);
+                    waitMilis(300);
+                    robot.arm.setPower(-1);
+                    waitMilis(1000);
+                    robot.arm.setPower(0);
+                    waitMilis(10000);
+                    autoPilot(3.14,1.57,70,.7,6);
+                    autoPilot(4.71, 1.57, 40, .5, 5);
+                }
+
+
+                stop();
+
+
+            if (tfod != null) {
+                tfod.shutdown();
+            }
+            waitMilis(5000);
+            stop();
         }
     }
 }
