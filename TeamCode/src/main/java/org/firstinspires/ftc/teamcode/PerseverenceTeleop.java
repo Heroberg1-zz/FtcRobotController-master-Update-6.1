@@ -427,7 +427,7 @@ PerseverenceTeleop extends LinearOpMode {
             telemetry.addData("Heading", headingRadians);
             telemetry.addData("RPM", rpmCurr);
             telemetry.addData("Motor Power", robot.flyWheel.getPower());
-            telemetry.addData("Color Right", robot.rightBottomColor.red());
+            telemetry.addData("Color Right", robot.rightBottomColor.blue());
 //            telemetry.addData("RightColor", robot.rightBottomColor.alpha());
 //            telemetry.addData("LeftColor", robot.leftBottomColor.alpha());
 //            telemetry.addData("Distance", robot.frontDistance.getDistance(DistanceUnit.CM));

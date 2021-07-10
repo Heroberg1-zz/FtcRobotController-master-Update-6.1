@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -13,17 +11,15 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.HardwarePerseverence;
 
 import java.util.List;
 
-@Autonomous(name = "Auto", group = "Pushbot")
-public class RedAuto extends LinearOpMode {
+@Autonomous(name = "BlueAutoLeft", group = "Bot")
+public class BlueAutoLeft extends LinearOpMode {
     // Increase this value to trust encoder odometry less when fusing encoder measurements with VSLAM
     double encoderMeasurementCovariance = 0.8;
     HardwarePerseverence robot = new HardwarePerseverence();
@@ -314,15 +310,17 @@ public class RedAuto extends LinearOpMode {
         robot.leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         robot.rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         waitMilis(100);
+        robot.finalEscapeServo.setPosition(.255);
+        robot.escapeServo.setPosition(0);
         telemetry.addData("Robot:", "Ready For Start");
         telemetry.update();
         waitForStart();
 
         while (opModeIsActive()) {
             //Universal Start
-
-            autoPilot(1.57, 2.7, 20, .8, 6);
-            autoPilot(5.93, 2.7, 5, .7, 6);
+            robot.flyWheel.setPower(.8);
+            autoPilot(1.57, 0.9, 35, .8, 6);
+            autoPilot(4.03, 0.9, 10, .7, 6);
             brake();
             waitMilis(1000);
             boolean quad = false;
@@ -354,42 +352,65 @@ public class RedAuto extends LinearOpMode {
                 if (quad) {
                     telemetry.addData("Working?", "Quad");
                     telemetry.update();
-                    autoPilot(1.57, 1.57, 170, .7, 6);
+                    autoPilot(1.57, 1.57, 90, .7, 6);
+                    brake();
+                    waitMilis(6000);
+                    //shoot
+                    robot.lookingGlass.setPower(1);
+                    robot.finalEscapeServo.setPosition(.05);
+                    waitMilis(4000);
+                    autoPilot(1.57,1.57,50,.7,6);
+                    //shoot end
                     waitMilis(200);
-                    while (robot.rightBottomColor.red() < 500) {
+                    while (robot.rightBottomColor.blue() < 500 || robot.rightBottomColor.blue() > 1200) {
                         whileAutoPilot(1.57, 1.57, .2);
                     }
                     brake();
-                    autoPilot(3.14,4.71,20,.6,6);
+                    autoPilot(0,4.71,15,.6,6);
                     robot.arm.setPower(1);
-                    autoPilot(0,4.71,13,.6,6);
-                    waitMilis(200);
+                    autoPilot(3.14,4.71,25,.6,6);
+                    autoPilot(1.57,4.71,10,.5,6);
+                    waitMilis(500);
                     robot.choker.setPosition(0);
                     robot.arm.setPower(0);
                     waitMilis(500);
                     robot.arm.setPower(-1);
-                    autoPilot(4.71,4.71,40,.6,6);
+                    autoPilot(4.71,4.71,45,.6,6);
+                    waitMilis(400);
                     robot.arm.setPower(0);
+                    stop();
+
 
 
                 } else if (single) {
                     telemetry.addData("Working?", "Single");
                     telemetry.update();
-                    autoPilot(1.57, 1.57, 170, .7, 6);
+                    autoPilot(1.57, 1.57, 90, .7, 6);
+                    brake();
+                    waitMilis(6000);
+                    //shoot
+                    robot.lookingGlass.setPower(1);
+                    robot.finalEscapeServo.setPosition(.05);
+                    waitMilis(4000);
+                    autoPilot(1.57,1.57,50,.7,6);
+                    //shoot end
                     waitMilis(200);
-                    while (robot.rightBottomColor.red() < 500) {
+                    while (robot.rightBottomColor.blue() < 500 || robot.rightBottomColor.blue() > 1200) {
                         whileAutoPilot(1.57, 1.57, .2);
                     }
                     brake();
-                    autoPilot(3.14, 0, 20, .5, 6);
                     robot.arm.setPower(1);
-                    autoPilot(0, 0, 15, .5, 6);
-                    robot.choker.setPosition(0);
-                    waitMilis(300);
-                    robot.arm.setPower(-1);
-                    waitMilis(200);
+                    autoPilot(0.85,3.14,16,.5,6);
+                    waitMilis(500);
                     robot.arm.setPower(0);
-                    autoPilot(4.71, 0, 60, .5, 5);
+                    waitMilis(200);
+                    robot.choker.setPosition(0);
+                    waitMilis(200);
+                    robot.arm.setPower(-1);
+                    waitMilis(300);
+                    autoPilot(3.14,3.14,5,0.5,3);
+                    autoPilot(4.71,1.57,30,.5,4);
+                    robot.arm.setPower(0);
                     stop();
 
 
@@ -397,22 +418,32 @@ public class RedAuto extends LinearOpMode {
 
                     telemetry.addData("Working?", "None");
                     telemetry.update();
-                    autoPilot(1.57, 1.57, 170, .7, 6);
-                    waitMilis(200);
+                    autoPilot(1.57, 1.57, 90, .7, 6);
+                    brake();
+                    waitMilis(6000);
+                    //shoot
+                    robot.lookingGlass.setPower(1);
+                    robot.finalEscapeServo.setPosition(.05);
+                    waitMilis(4000);
+                    autoPilot(1.57,1.57,50,.7,6);
+                    //shoot end
                     robot.arm.setPower(1);
-                    while (robot.rightBottomColor.red() < 500) {
+                    waitMilis(500);
+                    while (robot.rightBottomColor.blue() < 500 || robot.rightBottomColor.blue() > 1200) {
                         whileAutoPilot(1.57, 1.57, .2);
                     }
                     brake();
-                    autoPilot(1.57,1.57,10,.5,4);
                     robot.choker.setPosition(0);
                     waitMilis(300);
                     robot.arm.setPower(-1);
                     waitMilis(1000);
                     robot.arm.setPower(0);
-                    waitMilis(10000);
-                    autoPilot(3.14,1.57,70,.7,6);
+                    waitMilis(5000);
+                    autoPilot(0,1.57,70,.7,6);
                     autoPilot(4.71, 1.57, 40, .5, 5);
+
+                    stop();
+
                 }
 
 
@@ -422,7 +453,6 @@ public class RedAuto extends LinearOpMode {
             if (tfod != null) {
                 tfod.shutdown();
             }
-            waitMilis(5000);
             stop();
         }
     }
