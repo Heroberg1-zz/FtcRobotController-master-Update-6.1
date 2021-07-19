@@ -352,13 +352,13 @@ public class RedAutoLeft extends LinearOpMode {
                     telemetry.update();
                     autoPilot(1.57, 1.57, 90, .7, 6);
                     brake();
-                    waitMilis(6000);
+//                    waitMilis(6000);
                     //shoot
-                    robot.lookingGlass.setPower(1);
-                    robot.finalEscapeServo.setPosition(.05);
-                    waitMilis(4000);
+//                    robot.lookingGlass.setPower(1);
+//                    robot.finalEscapeServo.setPosition(.05);
+//                    waitMilis(4000);
                     autoPilot(0.8,1.57,70,.7,6);
-                    robot.lookingGlass.setPower(0);
+//                    robot.lookingGlass.setPower(0);
                     //shoot end
                     waitMilis(200);
                     while (robot.rightBottomColor.red() < 500) {
@@ -383,11 +383,11 @@ public class RedAutoLeft extends LinearOpMode {
                     brake();
                   //waitMilis(6000);
                     //shoot
-                    robot.lookingGlass.setPower(1);
-                    robot.finalEscapeServo.setPosition(.05);
+//                    robot.lookingGlass.setPower(1);
+//                    robot.finalEscapeServo.setPosition(.05);
                   //waitMilis(4000);
                     autoPilot(0.8,1.57,70,.7,6);
-                    robot.lookingGlass.setPower(0);
+//                    robot.lookingGlass.setPower(0);
                     //shoot end
                     waitMilis(200);
                     robot.arm.setPower(1);
@@ -413,14 +413,14 @@ public class RedAutoLeft extends LinearOpMode {
                     telemetry.update();
                     autoPilot(1.57, 1.57, 90, .7, 6);
                     brake();
-                    waitMilis(6000);
-                    //shoot
-                    robot.lookingGlass.setPower(1);
-                    robot.finalEscapeServo.setPosition(.05);
-                    waitMilis(4000);
+//                    waitMilis(6000);
+//                    //shoot
+//                    robot.lookingGlass.setPower(1);
+//                    robot.finalEscapeServo.setPosition(.05);
+//                    waitMilis(4000);
                     autoPilot(0.8,1.57,60,.7,6);
-                    robot.lookingGlass.setPower(0);
-                    //shoot end
+//                    robot.lookingGlass.setPower(0);
+//                    //shoot end
                     waitMilis(200);
                     while (robot.rightBottomColor.red() < 500) {
                         whileAutoPilot(1.57, 1.57, .2);
@@ -437,7 +437,7 @@ public class RedAutoLeft extends LinearOpMode {
                     autoPilot(2.25,3.14,60,.7,6);
                     autoPilot(3.14,3.14,40,.7,6);
                     autoPilot(4.71,3.14,70,.7,6);
-
+                    stop();
                 }
 
 

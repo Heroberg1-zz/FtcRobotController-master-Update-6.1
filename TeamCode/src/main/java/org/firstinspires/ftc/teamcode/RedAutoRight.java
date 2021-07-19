@@ -413,6 +413,7 @@ public class RedAutoRight extends LinearOpMode {
                     waitMilis(10000);
                     autoPilot(3.14,1.57,70,.7,6);
                     autoPilot(4.71, 1.57, 40, .5, 5);
+                    stop();
                 }
 
 

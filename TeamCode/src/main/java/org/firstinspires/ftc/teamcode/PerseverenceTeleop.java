@@ -321,7 +321,7 @@ PerseverenceTeleop extends LinearOpMode {
                     }
                     break;
                 case 2:
-                    if (runtime.milliseconds() > oldTime + 400 && !longEscape) {
+                    if (runtime.milliseconds() > oldTime + 250 && !longEscape) {
                         robot.finalEscapeServo.setPosition(finalClosedEscape);
                         escape++;
                     } else if (runtime.milliseconds() > oldTime + 2500 && longEscape) {
@@ -370,7 +370,7 @@ PerseverenceTeleop extends LinearOpMode {
             }
             //shooter on
             if (gamepad2.dpad_left) {
-                robot.flyWheel.setPower(.8);
+                robot.flyWheel.setPower(1);
                 flywheelOn = true;
                 flyWheelSlow = false;
             }
